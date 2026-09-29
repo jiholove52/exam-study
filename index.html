@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#f7f7fb"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>시험공부 통합실</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#ffffff; --text:#171922; --muted:#777c8c; --line:#e8eaf1;
+  --accent:#635bff; --ok:#1d9b64; --warn:#e39127; --danger:#d45454;
+  --soft:#efefff; --shadow:0 10px 30px rgba(23,25,34,.06); --radius:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR","Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+body{min-height:100vh}
+.app{max-width:1180px;margin:0 auto;padding:18px 18px 110px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 18px;position:sticky;top:0;background:rgba(246,247,251,.92);backdrop-filter:blur(14px);z-index:20}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#9c8cff);color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:var(--shadow)}
+.brand h1{font-size:20px;margin:0}.brand small{display:block;color:var(--muted);margin-top:2px}
+.topActions{display:flex;gap:8px;align-items:center}
+.pill,.ghost,.primary,.dangerBtn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 14px;font-weight:800;color:#343745}
+.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dangerBtn{color:var(--danger);border-color:#f0caca;background:#fff}
+.sync{display:inline-flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;background:#a8acb7}.dot.on{background:var(--ok)}
+.nav{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;background:#eaecf3;padding:7px;border-radius:20px;margin-bottom:22px}
+.nav button{border:0;background:transparent;border-radius:15px;padding:13px 8px;color:#6f7482;font-weight:900}
+.nav button.active{background:#fff;color:#191b22;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+.page{display:none}.page.active{display:block}
+.grid2{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+.hero{padding:28px}
+.kicker{color:var(--accent);font-size:13px;font-weight:900;margin-bottom:8px}
+h2,h3,p{margin-top:0}.hero h2{font-size:30px;margin-bottom:9px}.muted{color:var(--muted)}
+.bigCta{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--accent);color:#fff;padding:15px 19px;border-radius:16px;font-size:17px;font-weight:900}
+.stat{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:150px}
+.stat strong{font-size:42px}.stat span{color:var(--muted);margin-top:6px}
+.sectionTitle{display:flex;align-items:flex-end;justify-content:space-between;margin:22px 2px 12px}
+.sectionTitle h3{margin:0;font-size:20px}.sectionTitle small{color:var(--muted)}
+.subjectGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.subject{padding:18px}.subjectHead{display:flex;justify-content:space-between;gap:8px}
+.subject h3{font-size:17px;margin-bottom:6px}.badge{font-size:11px;font-weight:900;padding:6px 8px;border-radius:999px;background:#f1f2f6;color:#666b78;white-space:nowrap}
+.badge.high{background:#e8f7f0;color:#17784e}.badge.mid{background:#fff3de;color:#9d681a}.badge.low{background:#ffecec;color:#a94e4e}
+.progress{height:8px;background:#eff0f5;border-radius:999px;overflow:hidden;margin:14px 0 8px}.progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#9d91ff);border-radius:999px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:12px}
+.task{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 0;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}
+.taskLeft{display:flex;gap:12px;align-items:flex-start}.num{width:30px;height:30px;border-radius:10px;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-weight:900;flex:none}
+.task b{display:block;margin-bottom:4px}.task small{color:var(--muted)}
+.deadline{padding:16px;border:1px solid var(--line);border-radius:18px;background:#fbfbfe}.deadline strong{font-size:22px}.deadline .date{color:var(--muted);font-size:13px;margin-top:5px}
+.qbox{max-width:820px;margin:0 auto}.qHeader{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+.qPrompt{font-size:22px;line-height:1.5;font-weight:900;margin:16px 0 20px}
+.options{display:grid;gap:10px}.option{width:100%;text-align:left;padding:15px 16px;border:1px solid var(--line);border-radius:16px;background:#fff;font-weight:800}.option:hover{border-color:#c8c5ff;background:#fafaff}.option.selected{border-color:var(--accent);background:var(--soft)}
+.answerArea textarea,.uploadText,.blankArea textarea{width:100%;min-height:160px;border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff;resize:vertical}
+.feedback{margin-top:15px;padding:16px;border-radius:16px;background:#f7f7fb;border:1px solid var(--line)}
+.feedback.ok{background:#eef9f4;border-color:#c9ead9}.feedback.no{background:#fff1f1;border-color:#f0caca}
+.causeBtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.causeBtns button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 11px}
+.sourceTag{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f2f3f7;color:#6f7482;font-size:11px;font-weight:800;margin-right:6px}
+.predict{display:grid;grid-template-columns:1fr 1fr;gap:14px}.predictCard{padding:18px;border:1px solid var(--line);border-radius:18px}.predictCard h3{margin-bottom:7px}.level{font-weight:900;color:var(--accent)}
+.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:12px;border-bottom:1px solid var(--line);font-size:14px}.table th{color:var(--muted)}
+.uploadBox{border:2px dashed #d9dbe5;border-radius:18px;padding:24px;text-align:center;background:#fafafe}.uploadBox.drag{border-color:var(--accent);background:var(--soft)}
+.fileList{display:grid;gap:9px;margin-top:14px}.fileItem{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:900;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff}
+.modal{position:fixed;inset:0;background:rgba(12,14,20,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal.show{display:flex}.modalCard{width:min(720px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:24px;padding:22px;box-shadow:0 30px 90px rgba(0,0,0,.18)}
+.modalHead{display:flex;justify-content:space-between;gap:10px;align-items:center}.x{border:0;background:#f2f3f6;border-radius:12px;width:40px;height:40px;font-size:20px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#20222b;color:#fff;padding:11px 15px;border-radius:12px;display:none;z-index:200;font-weight:800}.toast.show{display:block}
+.focusOverlay{position:fixed;inset:0;background:#101116;color:#fff;z-index:150;display:none;align-items:center;justify-content:center;padding:24px}.focusOverlay.show{display:flex}.focusCard{max-width:520px;text-align:center}.timer{font-size:74px;font-weight:900;letter-spacing:-3px}.focusCard p{color:#b8bbc7}
+.small{font-size:12px}.empty{padding:28px;text-align:center;color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+.mobileNav{display:none}
+@media(max-width:860px){
+  .app{padding:12px 12px 98px}.brand small{display:none}.topActions .label{display:none}.nav{display:none}
+  .grid2,.grid3,.subjectGrid,.predict,.formGrid{grid-template-columns:1fr}
+  .hero{padding:22px}.hero h2{font-size:27px}
+  .mobileNav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:12px;right:12px;bottom:12px;z-index:40;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:22px;padding:7px;box-shadow:0 12px 35px rgba(0,0,0,.12)}
+  .mobileNav button{border:0;background:transparent;border-radius:15px;padding:10px 4px;font-size:11px;font-weight:900;color:#707482}
+  .mobileNav button.active{background:#f2f1ff;color:#262831}
+  .qPrompt{font-size:20px}.topbar{padding-top:6px}
+}
+
+/* v2: 쉬운 조작 / 큰 버튼 / 항상 보이는 메뉴 */
+body{font-size:17px;line-height:1.62}
+button,select,input,textarea{font-size:16px}
+button{min-height:50px}
+.primary,.ghost,.pill,.dangerBtn,.bigCta{min-height:52px;padding:12px 16px}
+.nav button{font-size:15px;min-height:54px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{
+  outline:4px solid rgba(99,91,255,.24);outline-offset:2px
+}
+.easyHelp{background:#fffbe9;border:1px solid #efe2a8;border-radius:18px;padding:16px;margin:14px 0}
+.easyHelp b{display:block;font-size:18px;margin-bottom:4px}
+.lessonCard{background:#fff;border:2px solid #dfdefb;border-radius:24px;padding:24px}
+.lessonTitle{font-size:28px;font-weight:950;line-height:1.35;margin-bottom:10px}
+.lessonText{font-size:19px;line-height:1.8}
+.lessonText li{margin:10px 0}
+.lessonActions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
+.lessonActions button{width:100%;font-size:17px}
+.bigSkip{background:#fff7e8;border:2px solid #e9bf77;color:#6d4b16}
+.visibleMenuNote{font-size:14px;color:#606575;margin-top:6px}
+.subjectOpen{width:100%;margin-top:14px}
+.x{width:auto;min-width:64px;padding:0 14px;font-size:16px;font-weight:900}
+@media(max-width:860px){
+  .topbar{position:static;display:block}
+  .brand{margin-bottom:10px}
+  .topActions{display:grid;grid-template-columns:repeat(3,1fr);width:100%}
+  .topActions .label{display:inline!important}
+  .pill{padding:10px 7px;font-size:14px}
+  .nav{display:grid!important;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
+  .nav button{font-size:14px;padding:10px 4px;min-height:50px}
+  .mobileNav{display:none!important}
+  .lessonActions{grid-template-columns:1fr}
+  .lessonTitle{font-size:24px}.lessonText{font-size:18px}
+}
+
+
+/* v3 일정표 + D-day */
+.ddayBanner{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  background:linear-gradient(135deg,#27283b,#4c46a8);color:#fff;
+  border-radius:22px;padding:16px 20px;margin:-4px 0 18px;box-shadow:var(--shadow);
+  cursor:pointer
+}
+.ddayBanner .ddMain{display:flex;align-items:center;gap:14px;min-width:0}
+.ddayBadge{background:#fff;color:#3c378a;padding:8px 11px;border-radius:13px;font-weight:950;white-space:nowrap}
+.ddayText{min-width:0}.ddayText b{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ddayText small{color:#dad9f8}
+.ddayGo{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:13px;padding:9px 12px;font-weight:900}
+.calendarWrap{overflow:hidden}
+.calendarHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.calendarHead h2{margin:0}
+.calNav{display:flex;gap:8px}.calNav button{min-width:52px}
+.weekHead,.calendarGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.weekHead div{text-align:center;color:var(--muted);font-size:13px;font-weight:900;padding:4px}
+.dayCell{min-height:112px;border:1px solid var(--line);border-radius:14px;padding:8px;background:#fff;cursor:pointer;overflow:hidden}
+.dayCell:hover{border-color:#c9c6ff}.dayCell.other{opacity:.35}.dayCell.today{border:2px solid var(--accent)}.dayCell.selected{background:var(--soft)}
+.dayNum{font-weight:900;margin-bottom:5px}.eventChip{display:block;font-size:11px;font-weight:800;line-height:1.25;padding:5px 6px;border-radius:8px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#f1f2f7}
+.eventChip.assignment{background:#fff0df;color:#865414}.eventChip.exam{background:#eeeaff;color:#554bb8}.eventChip.quiz{background:#e9f7f0;color:#147249}
+.eventForm{display:grid;grid-template-columns:1.3fr .9fr .9fr .8fr;gap:10px}
+.eventForm input,.eventForm select{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+.photoAnalyze{border:2px solid #d8d5ff;background:#faf9ff;border-radius:20px;padding:20px}
+.analysisStatus{margin-top:12px;border-radius:14px;padding:13px;background:#fff;border:1px solid var(--line)}
+.upcomingList{display:grid;gap:9px}.upcomingItem{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);border-radius:15px;padding:12px 14px;background:#fff}
+.upcomingItem .left{min-width:0}.upcomingItem b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.upcomingItem small{color:var(--muted)}
+.eventAction{display:flex;gap:6px}.eventAction button{min-height:40px;padding:7px 9px;font-size:13px}
+@media(max-width:860px){
+  .nav{grid-template-columns:repeat(3,1fr)!important}
+  .ddayBanner{padding:14px}.ddayGo{display:none}.ddayText b{font-size:16px}
+  .calendarGrid{gap:3px}.weekHead{gap:3px}.dayCell{min-height:82px;padding:5px;border-radius:10px}.dayNum{font-size:13px}.eventChip{font-size:9px;padding:3px 4px}
+  .eventForm{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo">EX</div><div><h1>시험공부 통합실</h1><small>PC + iPhone 자동동기화 · 5문제 집중형</small></div></div>
+  <div class="topActions">
+    <button class="pill sync" id="syncBtn"><span class="dot" id="syncDot"></span><span class="label" id="syncLabel">이 기기 저장</span></button>
+    <button class="pill" id="focusBtn">7분 집중</button>
+    <button class="pill" id="settingsBtn">설정</button>
+  </div>
+</header>
+
+<div class="ddayBanner" id="ddayBanner" onclick="goPage('schedule')">
+  <div class="ddMain">
+    <div class="ddayBadge" id="topDdayBadge">D-?</div>
+    <div class="ddayText"><b id="topDdayTitle">가장 가까운 일정 불러오는 중</b><small id="topDdayDate">일정표에서 과제·시험을 한 번에 관리해.</small></div>
+  </div>
+  <button class="ddayGo" onclick="event.stopPropagation();goPage('schedule')">일정표 보기</button>
+</div>
+
+<nav class="nav" id="nav">
+  <button data-page="today" class="active">오늘</button>
+  <button data-page="schedule">일정표</button>
+  <button data-page="learn">처음 배우기</button>
+  <button data-page="subjects">과목</button>
+  <button data-page="quiz">문제 풀기</button>
+  <button data-page="blank">백지복습</button>
+  <button data-page="predict">시험예측</button>
+  <button data-page="sources">자료 넣기</button>
+  <button data-page="analysis">내 분석</button>
+</nav>
+
+<main>
+<section class="page active" id="page-today">
+  <div class="grid2">
+    <div class="card hero">
+      <div class="kicker">처음 보는 내용이어도 괜찮음</div><h2>1~2분 배우고 → 바로 문제</h2>
+      <p class="muted">아는 게 없는 상태에서는 문제부터 던지지 않아. 먼저 핵심만 짧게 보여주고, 알아보기 문제부터 시작해.</p>
+      <div class="row"><button class="bigCta" onclick="goPage('learn');renderLesson()">처음 배우기</button><button class="ghost" onclick="startAdaptiveQuiz()">바로 문제 풀기</button><button class="ghost" onclick="goPage('analysis')">내 기록 보기</button></div>
+    </div>
+    <div class="card stat"><strong id="todaySolved">0</strong><span>오늘 푼 문제</span><div class="progress" style="width:80%;margin-top:16px"><i id="dailyBar" style="width:0%"></i></div><small class="muted">목표 15문제</small></div>
+  </div>
+  <div class="sectionTitle"><h3>가장 먼저 닥치는 것</h3><small>날짜 가까운 순</small></div><div class="grid3" id="deadlineGrid"></div>
+  <div class="sectionTitle"><h3>오늘의 3칸</h3><small>한 번에 하나씩만</small></div><div class="card" id="todayTasks"></div>
+  <div class="sectionTitle"><h3>공부법 자동 진단</h3><small>따로 시험 보지 않아도 됨</small></div>
+  <div class="card">
+    <div class="easyHelp"><b>진단 때문에 모르는 문제를 억지로 풀 필요 없음</b>
+      실제 공부를 하면서 ‘설명 후 정답률 · 문제만 풀었을 때 정답률 · 백지회상 성공률 · 걸린 시간’을 비교해서 공부법을 자동으로 보정해.</div>
+    <div class="row">
+      <button class="primary" onclick="goPage('learn');renderLesson()">1~2분 핵심부터 배우기</button>
+      <button class="ghost" onclick="goPage('analysis')">내 공부법 기록 보기</button>
+    </div>
+    <p class="visibleMenuNote" id="diagSummary">현재 시작 방식: 설명 → 쉬운 확인문제 → 5문제 → 필요하면 백지회상</p>
+  </div>
+</section>
+
+<section class="page" id="page-subjects"><div class="sectionTitle"><h3>6과목</h3><small>시험형식마다 공부법 다르게</small></div><div class="subjectGrid" id="subjectGrid"></div></section>
+
+
+
+<section class="page" id="page-schedule">
+  <div class="grid2">
+    <div class="card calendarWrap">
+      <div class="calendarHead">
+        <div><div class="kicker">과제 · 시험 · 퀴즈</div><h2 id="calendarTitle">2026년 9월</h2></div>
+        <div class="calNav">
+          <button class="ghost" onclick="moveCalendar(-1)">이전</button>
+          <button class="ghost" onclick="goCalendarToday()">오늘</button>
+          <button class="ghost" onclick="moveCalendar(1)">다음</button>
+        </div>
+      </div>
+      <div class="weekHead"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+      <div class="calendarGrid" id="calendarGrid"></div>
+      <div class="sectionTitle" style="margin-top:18px"><h3 id="selectedDateTitle">선택한 날짜 일정</h3><small>날짜를 누르면 아래에 표시</small></div>
+      <div id="selectedDateEvents" class="upcomingList"></div>
+    </div>
+
+    <div class="col">
+      <div class="card photoAnalyze">
+        <div class="kicker">제일 쉬운 방법</div>
+        <h3>과제 공지 사진 → 자동 일정 추가</h3>
+        <p class="muted">에브리타임·LMS·카톡 공지 캡처를 넣으면 글자를 읽고 <b>마감 날짜/시간</b>을 찾아 일정표에 자동으로 넣어.</p>
+        <div class="field"><label>어느 과목 공지야?</label><select id="photoEventSubject"></select></div>
+        <input id="assignmentPhotoInput" type="file" accept="image/*" style="display:none"/>
+        <button class="primary" style="width:100%;margin-top:10px" onclick="document.getElementById('assignmentPhotoInput').click()">과제 공지 사진 넣기</button>
+        <div class="analysisStatus" id="assignmentAnalysisStatus">사진을 넣으면 자동으로 분석해. 잘못 읽힌 일정은 바로 아래에서 수정할 수 있어.</div>
+      </div>
+
+      <div class="card">
+        <div class="kicker">직접 추가 / 수정</div>
+        <h3 id="eventFormTitle">일정 추가</h3>
+        <div class="field"><label>일정 이름</label><input id="eventTitle" placeholder="예: 뇌과학 과제 제출"/></div>
+        <div class="eventForm" style="margin-top:10px">
+          <select id="eventSubject"></select>
+          <select id="eventCategory"><option value="assignment">과제</option><option value="exam">시험</option><option value="quiz">퀴즈</option><option value="other">기타</option></select>
+          <input id="eventDate" type="date"/>
+          <input id="eventTime" type="time" value="23:59"/>
+        </div>
+        <input type="hidden" id="editingEventId"/>
+        <div class="row" style="margin-top:12px">
+          <button class="primary" onclick="saveCalendarEvent()">일정 저장</button>
+          <button class="ghost" onclick="resetEventForm()">새 일정</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="kicker">다가오는 일정</div>
+        <h3>마감 가까운 순</h3>
+        <div id="upcomingEvents" class="upcomingList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-learn">
+  <div class="card qbox">
+    <div class="qHeader">
+      <div>
+        <div class="kicker">0단계 · 처음 배우기</div>
+        <h3 style="font-size:24px">1~2분 핵심 설명</h3>
+      </div>
+      <select id="learnSubject" class="pill" onchange="renderLesson()"></select>
+    </div>
+
+    <div class="easyHelp">
+      <b>사용법</b>
+      ① 아래 핵심을 1~2분 읽기 → ② 확인문제 3개 → ③ 잘 풀리면 ‘이 내용 스킵’ 누르기.
+      모르면 설명을 다시 보면 돼.
+    </div>
+
+    <div class="lessonCard" id="lessonCard">
+      <div class="lessonTitle" id="lessonTitle">과목을 골라줘</div>
+      <div class="lessonText" id="lessonText">강의자료에서 핵심만 짧게 보여줄게.</div>
+      <div id="lessonSource" style="margin-top:14px"></div>
+    </div>
+
+    <div class="lessonActions">
+      <button class="primary" onclick="startLessonCheck()">이 내용 확인문제 3개 풀기</button>
+      <button class="bigSkip" onclick="skipCurrentLesson()">이미 아는 내용 → 스킵</button>
+      <button class="ghost" onclick="nextLesson()">다른 핵심 보기</button>
+      <button class="ghost" onclick="goPage('sources')">강의자료 추가하기</button>
+    </div>
+    <div id="lessonStatus" class="feedback" style="margin-top:14px">
+      처음이면 설명부터 읽어. 버튼은 모두 화면에 보이게 해놨어.
+    </div>
+  </div>
+</section>
+
+<section class="page" id="page-quiz">
+  <div class="card qbox">
+    <div class="qHeader"><div><div class="kicker" id="quizKicker">5문제 세션</div><h3 id="quizSubject">혼합</h3></div>
+      <div class="row"><select id="quizSubjectSelect" class="pill" onchange="resetQuizSession()"></select><span class="badge" id="quizProgress">0/5</span></div></div>
+    <div id="quizBody" class="empty">과목을 고르고 시작해.</div>
+    <div class="row" style="justify-content:space-between;margin-top:18px"><button class="ghost" onclick="resetQuizSession()">새 5문제</button><button class="primary" onclick="startQuizFromSelect()">시작</button></div>
+  </div>
+</section>
+
+<section class="page" id="page-blank">
+  <div class="card qbox blankArea">
+    <div class="qHeader"><div><div class="kicker">주관식/백지 회상</div><h3>안 보고 먼저 써보기</h3></div><select id="blankSubject" class="pill" onchange="newBlankPrompt()"></select></div>
+    <div class="qPrompt" id="blankPrompt">과목을 선택하면 문제가 나와.</div>
+    <textarea id="blankAnswer" placeholder="기억나는 걸 먼저 적어. 완벽하게 쓰려고 멈추지 말기."></textarea>
+    <div class="row" style="margin-top:12px"><button class="primary" onclick="revealBlank()">채점 기준 보기</button><button class="ghost" onclick="newBlankPrompt()">다른 문제</button></div>
+    <div id="blankFeedback"></div>
+  </div>
+</section>
+
+<section class="page" id="page-predict"><div class="sectionTitle"><h3>시험예측</h3><small>공식자료 > 교수 찝음 > 강의자료/녹취 > 과거후기</small></div><div class="predict" id="predictGrid"></div></section>
+
+<section class="page" id="page-sources">
+  <div class="grid2">
+    <div class="card">
+      <div class="kicker">자료 넣기</div><h3>강의자료·녹취·시험정보 추가</h3>
+      <p class="muted">자료를 넣으면 문제 후보뿐 아니라 <b>1~2분 핵심 설명</b>도 만든다. TXT/MD는 바로 읽고, PDF/PPTX/HWPX는 브라우저에서 텍스트를 뽑아. JPG/PNG는 OCR을 시도해. HWP는 보관만 하고 텍스트 추출은 지원하지 않아.</p>
+      <div class="formGrid">
+        <div class="field"><label>과목</label><select id="sourceSubject"></select></div>
+        <div class="field"><label>자료 종류</label><select id="sourceType"><option>교수 공식자료</option><option>강의 녹취</option><option>시험정보 캡처</option><option>강의계획서</option><option>내 메모</option></select></div>
+      </div>
+      <div class="uploadBox" id="dropZone" style="margin-top:12px">
+        <input type="file" id="fileInput" multiple style="display:none" accept=".txt,.md,.csv,.pdf,.pptx,.hwpx,.hwp,.png,.jpg,.jpeg,.webp"/>
+        <button class="primary" onclick="document.getElementById('fileInput').click()">파일 선택</button><p class="muted" style="margin:10px 0 0">또는 여기에 드래그</p>
+      </div>
+      <hr/>
+      <div class="field"><label>텍스트 직접 붙여넣기</label><textarea id="manualText" class="uploadText" placeholder="교수님이 찝어준 내용, 에브리타임 글, 녹취 일부 등을 그대로 붙여넣어도 돼."></textarea></div>
+      <div class="row" style="margin-top:10px"><button class="primary" onclick="saveManualSource()">자료 저장 + 문제 후보 만들기</button><button class="ghost" onclick="generateQuestionsFromAll()">저장된 자료 전체에서 문제 후보 생성</button></div>
+    </div>
+    <div class="card"><div class="kicker">현재 자료</div><h3>자료 준비도</h3><div id="sourceReadiness"></div><div class="fileList" id="sourceList"></div></div>
+  </div>
+</section>
+
+<section class="page" id="page-analysis">
+  <div class="grid3"><div class="card stat"><strong id="accStat">-</strong><span>전체 정답률</span></div><div class="card stat"><strong id="weakStat">-</strong><span>가장 약한 단원</span></div><div class="card stat"><strong id="streakStat">0</strong><span>연속 공부 세션</span></div></div>
+  <div class="sectionTitle"><h3>과목별 기록</h3><small>정답률·속도·실수 원인</small></div><div class="card" style="overflow:auto"><table class="table" id="analysisTable"></table></div>
+  <div class="sectionTitle"><h3>실수 패턴</h3><small>오답 뒤에 누른 원인 버튼 기준</small></div><div class="card" id="mistakePatterns"></div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="modalCard">
+    <div class="modalHead"><div><div class="kicker">PC + iPhone</div><h2 style="margin-bottom:0">자동동기화 설정</h2></div><button class="x" onclick="closeModal('settingsModal')">닫기</button></div>
+    <p class="muted">같은 GitHub Pages 주소에서 FAT 사이트의 자동동기화 설정을 찾으면 <b>자동으로 재사용</b>해. FAT 공부기록과는 별도 공간에 저장돼서 섞이지 않아. FAT 설정을 못 찾았을 때만 아래 값을 직접 넣으면 돼.</p>
+    <div class="field"><label>Supabase Project URL</label><input id="sbUrl" placeholder="https://xxxxx.supabase.co"/></div>
+    <div class="field" style="margin-top:10px"><label>Supabase publishable / anon key</label><input id="sbKey" placeholder="sb_publishable_... 또는 eyJ..."/></div>
+    <div class="field" style="margin-top:10px"><label>내 공부방 동기화 코드</label><input id="roomCode" placeholder="예: EXAM-2026-MID"/></div>
+    <div class="row" style="margin-top:14px"><button class="primary" onclick="connectSync()">연결하고 동기화 시작</button><button class="ghost" onclick="testSync()">연결 테스트</button><button class="dangerBtn" onclick="disconnectSync()">클라우드 연결 해제</button></div>
+    <hr/><div class="field"><label>화면 모드</label><select id="screenMode" onchange="saveScreenMode()"><option value="auto">자동</option><option value="pc">PC</option><option value="phone">iPhone</option></select></div>
+  </div>
+</div>
+
+<div class="modal" id="subjectModal"><div class="modalCard"><div class="modalHead"><div><div class="kicker">과목 상세</div><h2 id="subjectModalTitle"></h2></div><button class="x" onclick="closeModal('subjectModal')">닫기</button></div><div id="subjectModalBody"></div></div></div>
+
+<div class="focusOverlay" id="focusOverlay">
+  <div class="focusCard"><div class="kicker" style="color:#9d95ff">딴 거 보지 말고 이것만</div><h2 id="focusTitle">7분 집중</h2><div class="timer" id="focusTimer">07:00</div><p id="focusText">브라우저 다른 탭 닫고, 지금 문제 5개만.</p><div class="row" style="justify-content:center"><button class="primary" id="focusToggle" onclick="toggleFocusTimer()">시작</button><button class="ghost" onclick="closeFocus()" style="background:#22242d;color:#fff;border-color:#333641">닫기</button></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+const SUBJECTS = {
+ ai:{name:"AI와 생활자동화",color:"#635bff",readiness:78,format:"사례형 지필",method:"사례 구조화 → 프롬프트 비교 → 오류/테스트",note:"중간: 2~7주차. 사례 구조화 40% · 프롬프트/결과 30% · 오류분석/테스트 30%"},
+ brain:{name:"뇌과학",color:"#7a62d3",readiness:72,format:"객관식·주관식·T/F",method:"그림/기관 ↔ 기능 양방향 회상",note:"1~4주차 교수자료 있음. 시험 전주 교수 찝음이 최우선"},
+ consumer:{name:"현대사회에있어소비자의권리",color:"#ad69a9",readiness:30,format:"OX + 괄호채우기",method:"숫자·기간·기관명·예외 반복",note:"교수자료 없음. 녹취 + 과거후기 중심으로 채워야 함"},
+ hr:{name:"인적자원관리론",color:"#3c8f7d",readiness:86,format:"주관식 약술·논술",method:"백지답안 → 핵심어 누락 확인 → 재작성",note:"교수 중간 예습문제 있음: 큰 문제 택3, 작은 문제 택5"},
+ tang:{name:"당시의 인문학",color:"#b07b43",readiness:44,format:"중간/기말 없음 · 주관식 퀴즈",method:"강의 시청 → 차시별 핵심 주제 회상",note:"전반기 퀴즈 10/13~10/19 18:00. 출석45% + 퀴즈50%"},
+ law:{name:"기업법",color:"#4d668f",readiness:82,format:"객관식 + OX 중심",method:"정의 → 비교 → 사례판단 → OX",note:"중간 전 교수자료 범위 중심. 이후 자료는 기말로 분리"}
+};
+
+const PRELOADED_SOURCES = [
+ {subject:"ai",type:"강의계획서",name:"AI와 함께하는 생활자동화 강의계획",weight:5},
+ {subject:"brain",type:"교수 공식자료",name:"뇌과학 1~4주차 PPT/학습보조자료",weight:5},
+ {subject:"brain",type:"시험정보 캡처",name:"뇌과학 과거 중간고사 후기",weight:3},
+ {subject:"hr",type:"교수 공식자료",name:"인적자원관리 중간고사 예습문제",weight:6},
+ {subject:"hr",type:"교수 공식자료",name:"인적자원관리 Chapter 2·3 PPT",weight:5},
+ {subject:"consumer",type:"시험정보 캡처",name:"소비자권리 과거 중간고사 후기",weight:3},
+ {subject:"tang",type:"교수 공식공지",name:"당시의 인문학 강의진행·퀴즈 일정",weight:6},
+ {subject:"law",type:"교수 공식자료",name:"기업법 중간 전 강의자료 묶음",weight:5},
+ {subject:"law",type:"강의 녹취",name:"기업법 첫 주차 녹취",weight:4}
+];
+
+const QUESTIONS = [
+ {id:"ai1",s:"ai",t:"mcq",p:"생활 자동화 사례를 구조화할 때 가장 기본이 되는 흐름은?",o:["입력 → 처리 → 출력","계획 → 발표 → 평가","검색 → 복사 → 제출","오류 → 삭제 → 재설치"],a:0,e:"중간고사 핵심 범위에 입력-처리-출력 구조화가 명시돼 있어.",tag:"입력-처리-출력",src:"강의계획서",c:"높음"},
+ {id:"ai2",s:"ai",t:"short",p:"프롬프트 결과를 개선할 때 비교해야 하는 세 가지 기준을 적어봐.",keys:["정확성","유용성","형식 준수"],e:"2주차 계획에서 세 프롬프트 결과를 정확성·유용성·형식 준수 여부로 비교하게 되어 있어.",tag:"프롬프트",src:"강의계획서",c:"높음"},
+ {id:"ai3",s:"ai",t:"mcq",p:"오류 수정 기록의 올바른 흐름에 가장 가까운 것은?",o:["오류 → 가설 → 질문 → 수정 → 재시험","오류 → 삭제 → 새로 제작","결과 → 제출 → 수정","가설 → 발표 → 종료"],a:0,e:"수업계획에 5단계 디버깅 기록으로 명시됨.",tag:"오류분석",src:"강의계획서",c:"높음"},
+ {id:"ai4",s:"ai",t:"tf",p:"중간고사는 사례 구조화 40%, 프롬프트·결과 분석 30%, 오류 분석·테스트 30%로 평가된다.",a:true,e:"강의계획서의 중간고사 평가 기준과 일치.",tag:"시험구조",src:"강의계획서",c:"매우 높음"},
+ {id:"ai5",s:"ai",t:"short",p:"기록·목록 도구에서 시험하도록 제시된 예외 사례 4가지를 적어봐.",keys:["빈 제목","같은 제목 두 번","긴 제목","지난 날짜"],e:"기록·목록 수업에서 네 사례를 시험하도록 제시돼 있어.",tag:"테스트",src:"강의계획서",c:"높음"},
+
+ {id:"b1",s:"brain",t:"mcq",p:"말초신경계를 기능학적으로 나눌 때 옳은 것은?",o:["체성신경과 자율신경","뇌와 척수","전두엽과 두정엽","시상과 시상하부"],a:0,e:"말초신경계는 체성신경과 자율신경으로 나눌 수 있어.",tag:"신경계분류",src:"2주차 학습자료",c:"높음"},
+ {id:"b2",s:"brain",t:"mcq",p:"자율신경의 세부 분류는?",o:["감각·운동","교감·부교감","뇌·척수","전두·후두"],a:1,e:"자율신경은 교감신경과 부교감신경으로 구분.",tag:"신경계분류",src:"2주차 학습자료",c:"높음"},
+ {id:"b3",s:"brain",t:"fill",p:"말초신경계는 해부학적으로 뇌신경 __쌍과 척수신경 __쌍으로 구분할 수 있다.",keys:["12","31"],e:"교수자료에 뇌신경 12쌍, 척수신경 31쌍으로 제시됨.",tag:"숫자암기",src:"2주차 PPT",c:"높음"},
+ {id:"b4",s:"brain",t:"mcq",p:"신경세포의 정보 전달 방향으로 가장 적절한 것은?",o:["세포체 → 축삭 말단","축삭 말단 → 세포체만","뇌실 → 척수","수초 → 가지돌기"],a:0,e:"세포체에서 축삭 말단으로 정보를 전달하고 신경전달물질을 통해 다음 신경세포로 전달.",tag:"신경세포",src:"2주차 학습자료",c:"높음"},
+ {id:"b5",s:"brain",t:"tf",p:"유수신경은 무수신경보다 전달 속도가 빠르다.",a:true,e:"수초 때문에 유수신경의 전달 속도가 빠르다고 설명돼 있어.",tag:"신경세포",src:"2주차 학습자료",c:"높음"},
+ {id:"b6",s:"brain",t:"mcq",p:"해마의 대표 기능으로 가장 가까운 것은?",o:["공포 감정만 조절","단기기억을 장기기억으로 고착","좌우뇌 연결","호흡 조절"],a:1,e:"해마는 새로운 학습정보를 받아 단기기억에서 장기기억으로 형성·고착화하는 기능.",tag:"변연계",src:"3주차 학습자료",c:"높음"},
+ {id:"b7",s:"brain",t:"mcq",p:"편도체와 가장 관련이 깊은 기능은?",o:["공포·걱정 같은 감정","시각피질","청각피질","체온 조절만"],a:0,e:"편도체는 공포심, 걱정/근심 같은 감정과 관련.",tag:"변연계",src:"3주차 학습자료",c:"높음"},
+ {id:"b8",s:"brain",t:"mcq",p:"좌우 뇌를 연결하는 신경세포 집합체는?",o:["뇌량","해마","편도체","유두체"],a:0,e:"뇌량(corpus callosum)은 좌·우뇌를 연결.",tag:"뇌구조",src:"3주차 학습자료",c:"높음"},
+ {id:"b9",s:"brain",t:"mcq",p:"뇌 속을 관찰하는 3가지 단면법에 포함되지 않는 것은?",o:["횡단면","관상면","시상면","접선면"],a:3,e:"자료에는 횡단면, 관상면, 시상면이 제시돼.",tag:"해부학",src:"3주차 PPT",c:"높음"},
+ {id:"b10",s:"brain",t:"short",p:"뇌과학의 세부 수준 다섯 가지를 기억나는 만큼 적어봐.",keys:["분자","세포","시스템","행동학","인지"],e:"교수자료에 분자·세포·시스템·행동학·인지적 수준이 제시돼.",tag:"개요",src:"1주차 PPT",c:"높음"},
+
+ {id:"h1",s:"hr",t:"essay",p:"메이요의 호손연구 4단계를 설명하시오.",keys:["호손연구","4단계"],e:"교수 중간고사 예습문제의 큰 문제 후보.",tag:"공식큰문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h2",s:"hr",t:"essay",p:"직무분석과 직무평가에 대하여 설명하시오.",keys:["직무분석","직무평가"],e:"교수 중간고사 예습문제의 큰 문제 후보.",tag:"공식큰문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h3",s:"hr",t:"essay",p:"직무특성이론 모델을 설명하시오.",keys:["직무특성이론"],e:"교수 중간고사 예습문제의 큰 문제 후보.",tag:"공식큰문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h4",s:"hr",t:"essay",p:"BSC의 4가지 관점과 CSF, KPI를 설명하시오.",keys:["BSC","CSF","KPI"],e:"교수 중간고사 예습문제의 큰 문제 후보.",tag:"공식큰문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h5",s:"hr",t:"short",p:"인적자원관리의 기능 및 관리적 차원을 설명하시오.",keys:["인적자원관리","기능","관리적 차원"],e:"교수 예습문제의 작은 문제 후보.",tag:"공식작은문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h6",s:"hr",t:"short",p:"과학적 관리론의 3S를 적고 설명하시오.",keys:["3S"],e:"교수 예습문제의 작은 문제 후보.",tag:"공식작은문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h7",s:"hr",t:"short",p:"페이욜의 경영관리과정을 설명하시오.",keys:["페이욜","경영관리과정"],e:"교수 예습문제의 작은 문제 후보.",tag:"공식작은문제",src:"교수 예습문제",c:"매우 높음"},
+ {id:"h8",s:"hr",t:"short",p:"일반적인 선발절차를 순서대로 설명하시오.",keys:["선발절차"],e:"교수 예습문제의 작은 문제 후보.",tag:"공식작은문제",src:"교수 예습문제",c:"매우 높음"},
+
+ {id:"l1",s:"law",t:"mcq",p:"우리 상법상 기업의 주체에 해당하는 분류로 옳은 것은?",o:["당연상인·의제상인·소상인","대리상·중개인만","주식회사만","영업소·상호·상업장부"],a:0,e:"교수자료에 상법상 기업의 주체로 당연상인·의제상인·소상인이 제시됨.",tag:"상인",src:"기업의 주체 PPT",c:"높음"},
+ {id:"l2",s:"law",t:"short",p:"당연상인의 핵심 요건을 한 문장으로 적어봐.",keys:["자기명의","상행위"],e:"당연상인은 자기명의로 상행위를 하는 자.",tag:"상인",src:"기업의 주체 PPT",c:"높음"},
+ {id:"l3",s:"law",t:"mcq",p:"영업소에 대한 설명으로 가장 적절한 것은?",o:["본점과 지점이 있다","항상 한 곳만 존재한다","상호와 같은 개념이다","법률효과가 없다"],a:0,e:"상법상 영업소의 종류에는 본점과 지점이 있음.",tag:"영업소",src:"영업소·상호 PPT",c:"높음"},
+ {id:"l4",s:"law",t:"tf",p:"상호는 기호나 도안만으로도 성립한다.",a:false,e:"상호는 문자로 표시되고 발음할 수 있는 명칭이어야 하므로 기호나 도안은 포함되지 않음.",tag:"상호",src:"영업소·상호 PPT",c:"높음"},
+ {id:"l5",s:"law",t:"mcq",p:"상업장부에 포함되는 것은?",o:["회계장부와 대차대조표","주주명부와 손익계산서만","영수증과 계약서만","상호와 영업소"],a:0,e:"상업장부에는 회계장부와 대차대조표가 있음.",tag:"상업장부",src:"상업장부 PPT",c:"높음"},
+ {id:"l6",s:"law",t:"tf",p:"대차대조표는 상업장부이면서 재무제표이기도 하다.",a:true,e:"교수자료에 명시된 구분.",tag:"상업장부",src:"상업장부 PPT",c:"높음"},
+ {id:"l7",s:"law",t:"mcq",p:"우리 상법의 상행위 개념 입법주의는?",o:["주관주의적 절충주의","순수 객관주의","순수 주관주의","무제한 자유주의"],a:0,e:"교수자료에 우리 상법은 주관주의적 절충주의를 취한다고 설명.",tag:"상행위법",src:"상행위법 PPT",c:"높음"},
+ {id:"l8",s:"law",t:"mcq",p:"익명조합계약의 당사자는?",o:["영업자와 익명조합원","위탁자와 위탁매매인","본점과 지점","대리상과 중개인"],a:0,e:"익명조합의 당사자는 영업자와 익명조합원.",tag:"익명조합",src:"익명·합자조합 PPT",c:"높음"},
+ {id:"l9",s:"law",t:"tf",p:"익명조합원은 신용이나 노무를 출자목적물로 할 수 있다.",a:false,e:"교수자료상 출자목적물은 재산에 한정되고 신용·노무는 불가.",tag:"익명조합",src:"익명·합자조합 PPT",c:"높음"},
+ {id:"l10",s:"law",t:"mcq",p:"대리상에 대한 설명으로 옳은 것은?",o:["일정한 상인을 위해 상시 거래의 대리 또는 중개를 영업으로 하는 독립상인","상업사용인과 동일한 종속 지위","불특정다수인만 보조","일회성 수임인"],a:0,e:"대리상은 독립상인이며 일정한 상인을 위해 상시 대리·중개.",tag:"대리상",src:"대리상·중개업 PPT",c:"높음"},
+ {id:"l11",s:"law",t:"short",p:"위탁매매인이란 누구인지 핵심 표현 두 개를 포함해 적어봐.",keys:["자기명의","타인의 계산"],e:"위탁매매인은 자기명의로 타인의 계산으로 물건 또는 유가증권 매매를 영업으로 하는 자.",tag:"위탁매매",src:"위탁매매업 PPT",c:"높음"},
+ {id:"l12",s:"law",t:"tf",p:"위탁매매인이 지정가액보다 고가로 매도하거나 염가로 매수한 경우, 특별한 반대 약정이 없다면 그 차액은 위탁자의 이익으로 한다.",a:true,e:"교수자료에 제시된 원칙.",tag:"위탁매매",src:"위탁매매업 PPT",c:"높음"},
+ {id:"l13",s:"law",t:"mcq",p:"유가증권의 핵심 설명으로 맞는 것은?",o:["재산적 가치가 있는 사권을 표창하는 증권","단순 사실만 적은 모든 문서","지폐와 완전히 동일","권리를 전혀 표창하지 않는 증권"],a:0,e:"유가증권은 재산적 가치가 있는 사권을 표창.",tag:"유가증권",src:"유가증권 PPT",c:"높음"},
+ {id:"l14",s:"law",t:"mcq",p:"완전유가증권의 예시는?",o:["어음·수표","영수증·차용증서","소지품보관표","우표만"],a:0,e:"권리의 발생·이전·처분 모든 단계에서 점유가 필요한 어음·수표가 예시.",tag:"유가증권",src:"유가증권 PPT",c:"높음"},
+
+ {id:"t1",s:"tang",t:"mcq",p:"당시의 인문학은 중간·기말고사를 어떻게 운영하는가?",o:["둘 다 실시하지 않고 출석·퀴즈로 평가","중간만 실시","기말만 실시","둘 다 객관식"],a:0,e:"교수 공지에서 중간·기말고사를 실시하지 않는다고 명시.",tag:"평가",src:"교수 공지",c:"매우 높음"},
+ {id:"t2",s:"tang",t:"fill",p:"전반기 퀴즈 응시 기간은 10월 __일 00:00부터 10월 __일 18:00까지다.",keys:["13","19"],e:"교수 공지의 전반기 퀴즈 일정.",tag:"일정",src:"교수 공지",c:"매우 높음"},
+ {id:"t3",s:"tang",t:"mcq",p:"제2강의 핵심 주제는?",o:["당시에 표현된 계절과 시간 관념","상업등기","뇌의 해부","인사고과"],a:0,e:"강의계획서 제2강 주제.",tag:"강좌주제",src:"강의계획서",c:"높음"},
+ {id:"t4",s:"tang",t:"mcq",p:"제3강에서 다루는 큰 주제는?",o:["산수자연과 전원","기업의 주체","소비자분쟁","프롬프트"],a:0,e:"제3강은 당시의 산수자연과 전원(1).",tag:"강좌주제",src:"강의계획서",c:"높음"},
+ {id:"t5",s:"tang",t:"mcq",p:"제5강의 큰 주제는?",o:["당시와 술","당시와 법률","당시와 뇌","당시와 인공지능"],a:0,e:"제5강은 당시와 술(1).",tag:"강좌주제",src:"강의계획서",c:"높음"}
+];
+
+
+const BUILTIN_LESSONS = {
+ ai:[
+  {title:"입력 → 처리 → 출력", source:"AI와 생활자동화 강의계획서", bullets:[
+    "자동화 문제를 보면 먼저 ‘무엇이 들어오나(입력) → 어떤 규칙으로 바꾸나(처리) → 무엇이 나오나(출력)’로 나눠.",
+    "해결책부터 정하지 말고, 사용자의 불편·예외상황·성공기준을 먼저 잡는 게 중요해.",
+    "시험은 사례형이라 정의만 외우기보다 주어진 사례를 이 3단계로 나눌 수 있어야 해."
+  ]},
+  {title:"좋은 프롬프트는 비교해서 고친다", source:"AI와 생활자동화 강의계획서", bullets:[
+    "프롬프트에는 역할·목표·입력·출력형식 같은 조건을 분명하게 넣어.",
+    "예시를 추가한 버전, 예외조건을 추가한 버전을 비교해.",
+    "결과는 정확성·유용성·형식 준수 여부로 비교하고 다음 수정 계획을 세워."
+  ]},
+  {title:"오류는 재현 → 수정 → 재시험", source:"AI와 생활자동화 강의계획서", bullets:[
+    "버튼 무반응, 빈 입력, 잘못된 계산 같은 실패를 먼저 똑같이 재현해.",
+    "기대결과와 실제결과를 비교하고 원인 가설을 세워.",
+    "AI에 수정 요청한 뒤 같은 실패 사례와 정상 사례를 다시 시험해."
+  ]}
+ ],
+ brain:[
+  {title:"신경계 큰 틀부터", source:"뇌과학 2주차 교수자료", bullets:[
+    "신경계는 크게 중추신경계와 말초신경계로 나눠.",
+    "중추신경계는 뇌와 척수, 말초신경계는 체성신경과 자율신경으로 볼 수 있어.",
+    "체성신경은 감각·운동, 자율신경은 교감·부교감으로 다시 나뉘어.",
+    "해부학적으로 말초신경계는 뇌신경 12쌍, 척수신경 31쌍으로 구분해."
+  ]},
+  {title:"해마·편도체·뇌량 구별", source:"뇌과학 3주차 교수자료", bullets:[
+    "해마: 새로운 정보를 단기기억에서 장기기억으로 형성·고착하는 데 중요해.",
+    "편도체: 공포, 걱정 같은 감정과 관련이 커.",
+    "뇌량: 좌뇌와 우뇌를 연결하는 신경세포 집합체야.",
+    "시험에서는 이름→기능, 기능→이름 두 방향으로 물어볼 수 있어."
+  ]},
+  {title:"신경세포와 수초", source:"뇌과학 2주차 학습보조자료", bullets:[
+    "신경세포는 세포체·가지돌기·축삭·축삭말단으로 구성돼.",
+    "정보는 세포체에서 축삭말단 쪽으로 전달되고, 신경전달물질로 다음 세포에 전달돼.",
+    "수초가 있는 유수신경이 무수신경보다 전달 속도가 빠르다는 점을 구별해."
+  ]}
+ ],
+ hr:[
+  {title:"이 과목은 ‘공개문제 답안 만들기’가 먼저", source:"인적자원관리 중간고사 예습문제", bullets:[
+    "교수가 중간고사 큰 문제와 작은 문제 후보를 공식적으로 공개했어.",
+    "큰 문제는 호손연구, 직무분석·직무평가, 직무특성이론, BSC 관련이 핵심 후보야.",
+    "처음에는 답을 외우려 하지 말고, 문제마다 ‘목차 3~5개’를 먼저 잡은 뒤 내용을 붙여.",
+    "이 과목은 객관식 많이 푸는 것보다 안 보고 답의 구조를 꺼내는 연습이 중요해."
+  ]},
+  {title:"매슬로우와 X·Y 이론의 핵심", source:"인적자원관리 강의 녹취", bullets:[
+    "매슬로우의 핵심은 사람마다 현재 중요한 욕구가 다르므로 동기부여 방식도 달라져야 한다는 점이야.",
+    "X이론은 사람을 게으르고 감독이 필요한 존재로 보는 관점이 강해.",
+    "Y이론은 책임·성취·자기동기 가능성을 더 강조해.",
+    "시험에서는 두 이론을 정의만 쓰기보다 관리 방식 차이까지 연결해서 쓰는 게 좋아."
+  ]}
+ ],
+ law:[
+  {title:"당연상인·의제상인·소상인 큰 틀", source:"기업법 교수 PPT + 강의 녹취", bullets:[
+    "당연상인: 자기명의로 상행위를 영업으로 하는 자.",
+    "의제상인: 기본적 상행위 여부와 별개로 일정한 요건에서 상인으로 보는 경우.",
+    "소상인: 상인이지만 일부 상법 규정 적용에서 예외가 생기는 범주라서 구별이 중요해.",
+    "교수는 ‘큰 틀을 먼저 잡고 작은 내용으로 들어가라’는 식으로 반복해서 설명했어."
+  ]},
+  {title:"상업장부에서 잘 섞이는 것", source:"기업법 상업장부 교수 PPT", bullets:[
+    "상업장부에는 회계장부와 대차대조표가 있어.",
+    "대차대조표는 상업장부이면서 재무제표이기도 해.",
+    "회계장부는 상업장부이지만 재무제표와 같은 개념은 아니야.",
+    "주주명부·주주총회의사록·손익계산서 등을 상업장부라고 착각하지 않게 구별해."
+  ]},
+  {title:"대리상과 위탁매매인", source:"기업법 교수 PPT", bullets:[
+    "대리상은 일정한 상인을 위해 상시 거래의 대리 또는 중개를 영업으로 하는 독립상인이야.",
+    "위탁매매인은 자기명의로 타인의 계산으로 물건 또는 유가증권 매매를 영업으로 해.",
+    "둘 다 다른 사람의 영업을 돕지만 ‘누구 명의로 거래하나’와 법률관계를 구별해서 봐."
+  ]}
+ ],
+ tang:[
+  {title:"중간고사 대신 전반기 퀴즈", source:"당시의 인문학 교수 공식공지", bullets:[
+    "이 과목은 중간고사와 기말고사를 따로 실시하지 않아.",
+    "성적은 출석과 퀴즈 비중이 매우 크고, 전반기 퀴즈는 1강~6강 내용이 대상이야.",
+    "전반기 퀴즈 기간은 2026년 10월 13일 00:00부터 10월 19일 18:00까지야.",
+    "따라서 다른 과목 중간고사보다 먼저 1~6강을 시청하고 차시별 핵심을 정리해야 해."
+  ]}
+ ],
+ consumer:[
+  {title:"현재는 녹취를 넣으면 여기서부터 학습", source:"현재 확보 자료 안내", bullets:[
+    "이 과목은 교수 강의자료가 따로 올라오지 않았으므로 강의 녹취가 핵심 원문이야.",
+    "자료 넣기에서 녹취 TXT를 추가하면, 그 원문에서 중요 문장을 뽑아 1~2분 핵심 설명으로 만들어.",
+    "과거 시험정보는 OX·괄호채우기 형식을 잡는 참고자료로 쓰고, 실제 내용은 녹취를 우선해."
+  ]}
+ ]
+};
+
+
+const PREDICTIONS = [
+ {s:"hr",title:"교수 공개문제 그대로 대비",level:"매우 강함",text:"큰 문제 4개 중 3개, 작은 문제 8개 중 5개 후보가 공식 예습문제로 제시됨. 이 과목은 '예측'보다 공개문제 답안 완성도가 우선.",src:"교수 중간고사 예습문제"},
+ {s:"brain",title:"시험 전주 찝음이 최상위 신호",level:"강함",text:"과거후기상 객관식·주관식·T/F 혼합. 기관·기능·신경 명칭 암기가 필요하고 시험 전주 교수 지정 내용 비중이 높음.",src:"과거 시험정보 + 교수자료"},
+ {s:"consumer",title:"OX + 괄호채우기 중심",level:"중간",text:"과거 여러 후기에서 OX와 괄호채우기, 숫자·기간·단체명 암기가 반복됨. 실제 내용은 녹취를 넣을수록 정확도가 올라감.",src:"과거 시험정보"},
+ {s:"law",title:"객관식 + OX 중심",level:"강함",text:"강의계획서에 객관식과 OX 중심이라고 명시. 교수자료의 정의·구별·법률효과를 사례판단형으로 바꿔 연습.",src:"강의계획서 + 교수 PPT"},
+ {s:"ai",title:"사례형 지필",level:"강함",text:"입력-처리-출력 구조화, 기록·목록 기준, 프롬프트/결과 개선, 오류 분류와 재시험이 핵심. 답보다 과정 설명이 중요.",src:"강의계획서"},
+ {s:"tang",title:"중간고사 없음",level:"확정",text:"전반기 1~6강 퀴즈가 10/13~10/19 18:00에 열림. 중간고사 대신 퀴즈 일정 관리가 핵심.",src:"교수 공식공지"}
+];
+
+const DEADLINES = [
+ {name:"당시의 인문학 전반기 퀴즈 시작",date:"2026-10-13T00:00:00"},
+ {name:"중간고사 기간 시작",date:"2026-10-20T00:00:00"},
+ {name:"중간고사 기간 종료",date:"2026-10-26T23:59:00"}
+];
+
+const initialState = {attempts:[],causes:{},sessions:0,lastSessionDate:null,streak:0,diagnostic:null,sources:[],generated:[],lessons:{},lessonIndex:{},lessonSkipped:{},learningStats:{},events:[],updatedAt:0,settings:{screenMode:"auto"},completedTasks:{}};
+let state=loadState(),syncClient=null,syncTimer=null,pushTimer=null,quizSession=[],quizIndex=0,currentSelected=null,qStart=0,focusRemaining=420,focusRunning=false,focusInt=null,lessonMode=false,lessonSubject=null,lessonAttemptStart=0,calendarCursor=new Date(),calendarSelected=null,cloudVersion=0,cloudReady=false,cloudBusy=false,cloudPollTimer=null;
+
+function loadState(){try{return {...initialState,...JSON.parse(localStorage.getItem("examStudyState")||"{}")}}catch(e){return {...initialState}}}
+function saveState(sync=true){state.updatedAt=Date.now();localStorage.setItem("examStudyState",JSON.stringify(state));renderAll();if(sync)schedulePush()}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function closeModal(id){document.getElementById(id).classList.remove("show")} function openModal(id){document.getElementById(id).classList.add("show")}
+function goPage(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById("page-"+p).classList.add("active");document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===p));window.scrollTo({top:0,behavior:"smooth"})}
+document.querySelectorAll("[data-page]").forEach(b=>b.onclick=()=>goPage(b.dataset.page));
+document.getElementById("settingsBtn").onclick=()=>openSettings();document.getElementById("syncBtn").onclick=()=>openSettings();document.getElementById("focusBtn").onclick=()=>document.getElementById("focusOverlay").classList.add("show");
+
+function daysTo(dateStr){return Math.ceil((new Date(dateStr)-new Date())/86400000)}
+
+const DEFAULT_EVENTS = [
+  {id:"default-tang-quiz",title:"당시의 인문학 전반기 퀴즈 마감",subject:"tang",category:"quiz",due:"2026-10-19T18:00:00",source:"교수 공식공지",createdAt:1,updatedAt:1,locked:true},
+  {id:"default-mid-start",title:"중간고사 기간 시작",subject:"",category:"exam",due:"2026-10-20T00:00:00",source:"학사 일정",createdAt:1,updatedAt:1,locked:true},
+  {id:"default-mid-end",title:"중간고사 기간 종료",subject:"",category:"exam",due:"2026-10-26T23:59:00",source:"학사 일정",createdAt:1,updatedAt:1,locked:true}
+];
+function ensureDefaultEvents(){
+  state.events=state.events||[];
+  const ids=new Set(state.events.map(e=>e.id));
+  DEFAULT_EVENTS.forEach(e=>{if(!ids.has(e.id))state.events.push({...e})});
+}
+function activeEvents(){return (state.events||[]).filter(e=>!e.deleted)}
+function subjectName(k){return SUBJECTS[k]?.name||""}
+function eventCatName(c){return c==="assignment"?"과제":c==="exam"?"시험":c==="quiz"?"퀴즈":"기타"}
+function dateKey(d){const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`}
+function localDateTimeString(d){const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}T${String(x.getHours()).padStart(2,"0")}:${String(x.getMinutes()).padStart(2,"0")}:${String(x.getSeconds()).padStart(2,"0")}`}
+function formatDue(iso){
+  const d=new Date(iso);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function ddayLabel(iso){
+  const now=new Date(),due=new Date(iso);
+  const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const dueDay=new Date(due.getFullYear(),due.getMonth(),due.getDate());
+  const n=Math.round((dueDay-today)/86400000);
+  return n>0?`D-${n}`:n===0?"D-DAY":`D+${Math.abs(n)}`;
+}
+function renderTopDday(){
+  const now=Date.now();
+  const upcoming=activeEvents().filter(e=>new Date(e.due).getTime()>=now-3600000).sort((a,b)=>new Date(a.due)-new Date(b.due));
+  const badge=document.getElementById("topDdayBadge"),title=document.getElementById("topDdayTitle"),date=document.getElementById("topDdayDate");
+  if(!upcoming.length){badge.textContent="일정 없음";title.textContent="새 과제나 시험 일정을 추가해줘";date.textContent="공지 사진을 넣으면 자동으로 추가할 수 있어.";return}
+  const e=upcoming[0];badge.textContent=ddayLabel(e.due);title.textContent=`${subjectName(e.subject)?subjectName(e.subject)+" · ":""}${e.title}`;date.textContent=`${formatDue(e.due)} · ${eventCatName(e.category)}`;
+}
+function populateEventSelects(){
+  ["photoEventSubject","eventSubject"].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;const prev=el.value;el.innerHTML='<option value="">과목 선택</option>';
+    Object.entries(SUBJECTS).forEach(([k,s])=>el.innerHTML+=`<option value="${k}">${s.name}</option>`);
+    if(prev)el.value=prev;
+  });
+}
+function renderCalendar(){
+  const title=document.getElementById("calendarTitle");if(!title)return;
+  const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+  title.textContent=`${y}년 ${m+1}월`;
+  const first=new Date(y,m,1),last=new Date(y,m+1,0),start=first.getDay();
+  const cells=[];for(let i=0;i<42;i++){const d=new Date(y,m,1-start+i);cells.push(d)}
+  const events=activeEvents();
+  const today=dateKey(new Date());
+  const grid=document.getElementById("calendarGrid");grid.innerHTML="";
+  cells.forEach(d=>{
+    const key=dateKey(d),dayEvents=events.filter(e=>dateKey(e.due)===key).sort((a,b)=>new Date(a.due)-new Date(b.due));
+    const cls=["dayCell",d.getMonth()!==m?"other":"",key===today?"today":"",key===calendarSelected?"selected":""].filter(Boolean).join(" ");
+    const chips=dayEvents.slice(0,2).map(e=>`<span class="eventChip ${e.category}">${escapeHtml(e.title)}</span>`).join("");
+    const more=dayEvents.length>2?`<span class="eventChip">+${dayEvents.length-2}개</span>`:"";
+    grid.innerHTML+=`<div class="${cls}" onclick="selectCalendarDate('${key}')"><div class="dayNum">${d.getDate()}</div>${chips}${more}</div>`;
+  });
+  if(!calendarSelected)calendarSelected=today;
+  renderSelectedDateEvents();renderUpcomingEvents();renderTopDday();
+}
+function moveCalendar(n){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+n,1);renderCalendar()}
+function goCalendarToday(){calendarCursor=new Date();calendarSelected=dateKey(new Date());renderCalendar()}
+function selectCalendarDate(key){calendarSelected=key;const [y,m]=key.split("-").map(Number);calendarCursor=new Date(y,m-1,1);renderCalendar()}
+function renderSelectedDateEvents(){
+  const box=document.getElementById("selectedDateEvents"),h=document.getElementById("selectedDateTitle");if(!box||!h)return;
+  h.textContent=`${calendarSelected||dateKey(new Date())} 일정`;
+  const ev=activeEvents().filter(e=>dateKey(e.due)===(calendarSelected||dateKey(new Date()))).sort((a,b)=>new Date(a.due)-new Date(b.due));
+  box.innerHTML=ev.length?ev.map(eventRow).join(""):'<div class="empty">이 날짜에는 일정이 없어.</div>';
+}
+function eventRow(e){
+  return `<div class="upcomingItem"><div class="left"><b>${escapeHtml(e.title)}</b><small>${subjectName(e.subject)?subjectName(e.subject)+" · ":""}${eventCatName(e.category)} · ${formatDue(e.due)}${e.auto?" · 사진 자동추가":""}</small></div><div class="eventAction"><button class="ghost" onclick="editEvent('${e.id}')">수정</button>${e.locked?"":`<button class="dangerBtn" onclick="deleteEvent('${e.id}')">삭제</button>`}</div></div>`;
+}
+function renderUpcomingEvents(){
+  const box=document.getElementById("upcomingEvents");if(!box)return;
+  const now=Date.now();const ev=activeEvents().filter(e=>new Date(e.due).getTime()>=now-3600000).sort((a,b)=>new Date(a.due)-new Date(b.due)).slice(0,8);
+  box.innerHTML=ev.length?ev.map(e=>`<div class="upcomingItem"><div class="left"><b>${escapeHtml(e.title)}</b><small>${ddayLabel(e.due)} · ${formatDue(e.due)}${subjectName(e.subject)?" · "+subjectName(e.subject):""}</small></div><button class="ghost" onclick="editEvent('${e.id}')">보기</button></div>`).join(""):'<div class="empty">다가오는 일정이 없어.</div>';
+}
+function saveCalendarEvent(){
+  const title=document.getElementById("eventTitle").value.trim(),subject=document.getElementById("eventSubject").value,category=document.getElementById("eventCategory").value,date=document.getElementById("eventDate").value,time=document.getElementById("eventTime").value||"23:59",id=document.getElementById("editingEventId").value;
+  if(!title||!date){showToast("일정 이름과 날짜는 꼭 넣어줘");return}
+  const due=`${date}T${time}:00`,now=Date.now();
+  if(id){
+    const e=state.events.find(x=>x.id===id);if(e){Object.assign(e,{title,subject,category,due,updatedAt:now})}
+  }else state.events.push({id:"ev-"+now+"-"+Math.random().toString(36).slice(2,7),title,subject,category,due,source:"직접 입력",createdAt:now,updatedAt:now});
+  calendarSelected=date;calendarCursor=new Date(date+"T12:00:00");resetEventForm();saveState();showToast("일정 저장됨");
+}
+function resetEventForm(){
+  document.getElementById("eventFormTitle").textContent="일정 추가";document.getElementById("editingEventId").value="";document.getElementById("eventTitle").value="";document.getElementById("eventCategory").value="assignment";document.getElementById("eventDate").value=calendarSelected||dateKey(new Date());document.getElementById("eventTime").value="23:59";
+}
+function editEvent(id){
+  const e=state.events.find(x=>x.id===id);if(!e)return;goPage("schedule");
+  const d=new Date(e.due);document.getElementById("eventFormTitle").textContent="일정 수정";document.getElementById("editingEventId").value=e.id;document.getElementById("eventTitle").value=e.title;document.getElementById("eventSubject").value=e.subject||"";document.getElementById("eventCategory").value=e.category||"other";document.getElementById("eventDate").value=dateKey(d);document.getElementById("eventTime").value=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;document.getElementById("eventTitle").scrollIntoView({behavior:"smooth",block:"center"});
+}
+function deleteEvent(id){
+  const e=state.events.find(x=>x.id===id);if(!e||e.locked)return;if(!confirm("이 일정을 삭제할까?"))return;e.deleted=true;e.updatedAt=Date.now();saveState();showToast("삭제됨");
+}
+function detectAssignmentInfo(text,subject){
+  const clean=String(text||"").replace(/\r/g,"");const lines=clean.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const candidates=[];const yearNow=new Date().getFullYear();
+  const patterns=[
+    {re:/(20\d{2})\s*[.\-\/년]\s*(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*일?/g,full:true},
+    {re:/(\d{1,2})\s*월\s*(\d{1,2})\s*일/g,full:false},
+    {re:/(\d{1,2})\s*[.\/\-]\s*(\d{1,2})(?!\d)/g,full:false}
+  ];
+  for(const p of patterns){
+    let m;while((m=p.re.exec(clean))){
+      let y,mo,da;if(p.full){y=+m[1];mo=+m[2];da=+m[3]}else{y=yearNow;mo=+m[1];da=+m[2]}
+      if(mo<1||mo>12||da<1||da>31)continue;
+      const around=clean.slice(Math.max(0,m.index-40),Math.min(clean.length,m.index+m[0].length+50));
+      let score=0;if(/마감|제출|기한|까지|종료|완료|과제/.test(around))score+=5;if(/작성일|게시일|등록일/.test(around))score-=4;
+      let hh=23,mm=59;
+      const tm=around.match(/(오전|오후)?\s*(\d{1,2})\s*(?::|시)\s*(\d{1,2})?\s*분?/);
+      if(tm){hh=+tm[2];mm=tm[3]?+tm[3]:0;if(tm[1]==="오후"&&hh<12)hh+=12;if(tm[1]==="오전"&&hh===12)hh=0}
+      let due=new Date(y,mo-1,da,hh,mm,0);
+      if(!p.full && due.getTime()<Date.now()-1000*86400*120)due=new Date(y+1,mo-1,da,hh,mm,0);
+      candidates.push({due,score,index:m.index,around});
+    }
+  }
+  candidates.sort((a,b)=>b.score-a.score || b.due-a.due);
+  let titleLine=lines.find(l=>/과제|레포트|보고서|발표|제출|퀴즈/.test(l)&&l.length<=70);
+  if(!titleLine)titleLine=lines.find(l=>l.length>=4&&l.length<=50);
+  let title=(titleLine||"과제 공지").replace(/\s+/g," ").replace(/20\d{2}[.\-\/년]\s*\d{1,2}[.\-\/월]\s*\d{1,2}일?/g,"").trim();
+  if(!/과제|레포트|보고서|발표|퀴즈/.test(title))title=`${subjectName(subject)||"수업"} 과제`;
+  return {due:candidates[0]?.due||null,title,confidence:candidates[0]?.score||0,raw:clean};
+}
+async function analyzeAssignmentPhoto(file){
+  const status=document.getElementById("assignmentAnalysisStatus"),subject=document.getElementById("photoEventSubject").value;
+  if(!subject){showToast("과목부터 골라줘");return}
+  if(!window.Tesseract){status.innerHTML="사진 분석 기능을 불러오지 못했어.";return}
+  status.innerHTML="<b>사진 읽는 중…</b><br>글자가 많으면 10~30초 정도 걸릴 수 있어.";
+  try{
+    const {data:{text}}=await Tesseract.recognize(file,"kor+eng",{logger:m=>{if(m.status==="recognizing text")status.innerHTML=`<b>사진 읽는 중 ${Math.round((m.progress||0)*100)}%</b><br>마감 날짜와 시간을 찾고 있어.`}});
+    const info=detectAssignmentInfo(text,subject);
+    if(!info.due){status.innerHTML=`<b>날짜를 확실히 못 찾았어.</b><br>아래 직접 추가 칸에 OCR 글을 참고해서 날짜만 넣어줘.<details><summary>읽은 글 보기</summary><div class="small">${escapeHtml(text).replace(/\n/g,"<br>")}</div></details>`;return}
+    const now=Date.now(),id="auto-"+now+"-"+Math.random().toString(36).slice(2,7);
+    state.events.push({id,title:info.title,subject,category:"assignment",due:localDateTimeString(info.due),source:"공지 사진 OCR",createdAt:now,updatedAt:now,auto:true,ocrText:text.slice(0,5000)});
+    calendarSelected=dateKey(info.due);calendarCursor=new Date(info.due.getFullYear(),info.due.getMonth(),1);saveState();
+    status.innerHTML=`<b>자동 추가 완료</b><br>${escapeHtml(info.title)} · ${formatDue(info.due)}<br><span class="muted small">사진에서 자동으로 읽은 거라 날짜가 다르면 ‘수정’ 버튼으로 바로 고쳐.</span><div style="margin-top:8px"><button class="ghost" onclick="editEvent('${id}')">방금 일정 수정</button></div>`;
+  }catch(e){console.error(e);status.innerHTML="<b>사진 분석 실패</b><br>다시 시도하거나 일정 직접 추가를 이용해줘."}
+}
+document.getElementById("assignmentPhotoInput")?.addEventListener("change",e=>{const f=e.target.files?.[0];if(f)analyzeAssignmentPhoto(f);e.target.value=""});
+
+
+function renderDeadlines(){const el=document.getElementById("deadlineGrid");el.innerHTML="";DEADLINES.forEach(d=>{const n=daysTo(d.date),label=n>0?`D-${n}`:n===0?"오늘":"지남";el.innerHTML+=`<div class="deadline"><div class="kicker">${label}</div><strong>${d.name}</strong><div class="date">${new Date(d.date).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div></div>`})}
+function todayCount(){const key=new Date().toISOString().slice(0,10);return state.attempts.filter(a=>a.day===key).length}
+function renderToday(){
+ const n=todayCount();document.getElementById("todaySolved").textContent=n;document.getElementById("dailyBar").style.width=Math.min(100,n/15*100)+"%";
+ const tasks=[{k:"hr",title:"인적자원관리 공식문제 1개 백지",desc:"교수 예습문제라 가장 먼저 완성"},{k:"brain",title:"뇌과학 5문제",desc:"기관 ↔ 기능 양방향으로"},{k:"law",title:"기업법 OX/객관식 5문제",desc:"정의보다 구별·사례판단"}];
+ const e=document.getElementById("todayTasks");e.innerHTML="";tasks.forEach((t,i)=>{const done=!!state.completedTasks[t.k+":"+i];e.innerHTML+=`<div class="task"><div class="taskLeft"><div class="num">${i+1}</div><div><b>${t.title}</b><small>${t.desc}</small></div></div><button class="${done?"ghost":"primary"}" onclick="quickTask('${t.k}',${i})">${done?"완료":"시작"}</button></div>`});
+ document.getElementById("diagSummary").textContent=state.diagnostic?`현재 추천: ${state.diagnostic.recommendation}`:"아직 진단 전 · 기본은 5문제 혼합형"
+}
+function quickTask(k,i){if(k==="hr"){document.getElementById("blankSubject").value="hr";goPage("blank");newBlankPrompt()}else{document.getElementById("quizSubjectSelect").value=k;goPage("quiz");startQuiz(k)}state.completedTasks[k+":"+i]=true;saveState()}
+function renderSubjects(){const el=document.getElementById("subjectGrid");el.innerHTML="";Object.entries(SUBJECTS).forEach(([k,s])=>{const status=s.readiness>=75?"high":s.readiness>=45?"mid":"low";el.innerHTML+=`<div class="card subject" onclick="openSubject('${k}')"><div class="subjectHead"><div><h3>${s.name}</h3><div class="muted small">${s.format}</div></div><span class="badge ${status}">자료 ${s.readiness}%</span></div><div class="progress"><i style="width:${s.readiness}%;background:${s.color}"></i></div><div class="small muted">${s.method}</div><button class="ghost subjectOpen" onclick="event.stopPropagation();openSubject(\'${k}\')">이 과목 열기</button></div>`})}
+function openSubject(k){const s=SUBJECTS[k],qs=allQuestions().filter(q=>q.s===k),att=state.attempts.filter(a=>a.s===k),acc=att.length?Math.round(att.filter(a=>a.ok).length/att.length*100):null;document.getElementById("subjectModalTitle").textContent=s.name;document.getElementById("subjectModalBody").innerHTML=`<div class="predictCard"><div class="kicker">시험형식</div><h3>${s.format}</h3><p class="muted">${s.note}</p></div><div class="predictCard" style="margin-top:12px"><div class="kicker">추천 공부법</div><h3>${s.method}</h3><p class="muted">현재 문제 ${qs.length}개 · 누적 풀이 ${att.length}개${acc!==null?` · 정답률 ${acc}%`:""}</p></div><div class="row" style="margin-top:14px"><button class="primary" onclick="closeModal('subjectModal');document.getElementById('quizSubjectSelect').value='${k}';goPage('quiz');startQuiz('${k}')">5문제 풀기</button><button class="ghost" onclick="closeModal('subjectModal');document.getElementById('blankSubject').value='${k}';goPage('blank');newBlankPrompt()">백지복습</button></div>`;openModal("subjectModal")}
+
+function allQuestions(){return QUESTIONS.concat(state.generated||[])}
+function populateSelects(){["quizSubjectSelect","blankSubject","sourceSubject","learnSubject"].forEach(id=>{const el=document.getElementById(id),prev=el.value;el.innerHTML="";if(id==="quizSubjectSelect")el.innerHTML='<option value="mix">약점 자동선택</option>';Object.entries(SUBJECTS).forEach(([k,s])=>el.innerHTML+=`<option value="${k}">${s.name}</option>`);if(prev)el.value=prev})}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function pickAdaptive(){const answerable=allQuestions().filter(q=>["mcq","tf","fill","short"].includes(q.t));if(!state.attempts.length)return shuffle(answerable).slice(0,5);const scores={};answerable.forEach(q=>{const a=state.attempts.filter(x=>x.s===q.s&&x.tag===q.tag),rate=a.length?a.filter(x=>x.ok).length/a.length:.55;scores[q.id]=(1-rate)+(q.c==="매우 높음"?.35:q.c==="높음"?.2:0)+Math.random()*.15});return answerable.sort((a,b)=>scores[b.id]-scores[a.id]).slice(0,5)}
+function startAdaptiveQuiz(){goPage("quiz");document.getElementById("quizSubjectSelect").value="mix";startQuiz("mix")}
+function startQuizFromSelect(){startQuiz(document.getElementById("quizSubjectSelect").value)}
+function startQuiz(k,limit=5){quizIndex=0;currentSelected=null;if(k==="mix")quizSession=pickAdaptive().slice(0,limit);else quizSession=shuffle(allQuestions().filter(q=>q.s===k&&["mcq","tf","fill","short"].includes(q.t))).slice(0,limit);if(!quizSession.length){document.getElementById("quizBody").innerHTML='<div class="empty">이 과목은 아직 자동채점 문제 자료가 부족해. 자료 탭에서 녹취/교수자료를 추가해줘.</div>';return}renderQuestion()}
+function resetQuizSession(){quizSession=[];quizIndex=0;document.getElementById("quizProgress").textContent="0/5";document.getElementById("quizBody").innerHTML='<div class="empty">과목을 고르고 시작해.</div>'}
+function renderQuestion(){if(quizIndex>=quizSession.length){finishSession();return}const q=quizSession[quizIndex];currentSelected=null;qStart=Date.now();document.getElementById("quizProgress").textContent=`${quizIndex+1}/${quizSession.length}`;document.getElementById("quizSubject").textContent=SUBJECTS[q.s].name;document.getElementById("quizKicker").textContent=`${q.t==="tf"?"OX":q.t==="mcq"?"객관식":q.t==="fill"?"빈칸":"단답"} · ${q.tag}`;let input="";if(q.t==="mcq")input=`<div class="options">${q.o.map((o,i)=>`<button class="option" onclick="selectOption(${i},this)">${i+1}. ${o}</button>`).join("")}</div><div class="row" style="margin-top:14px"><button class="primary" onclick="submitCurrent()">채점</button></div>`;if(q.t==="tf")input=`<div class="options"><button class="option" onclick="selectOption(true,this)">O</button><button class="option" onclick="selectOption(false,this)">X</button></div><div class="row" style="margin-top:14px"><button class="primary" onclick="submitCurrent()">채점</button></div>`;if(q.t==="fill"||q.t==="short")input=`<div class="answerArea"><textarea id="textAnswer" placeholder="정답을 적어봐. 완벽한 문장 말고 핵심어만 적어도 됨."></textarea></div><div class="row" style="margin-top:14px"><button class="primary" onclick="submitCurrent()">채점</button></div>`;document.getElementById("quizBody").innerHTML=`<div><span class="sourceTag">${q.src}</span><span class="sourceTag">근거 ${q.c}</span></div><div class="qPrompt">${q.p}</div>${input}<div id="feedbackSlot"></div>`}
+function selectOption(v,btn){currentSelected=v;document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected")}
+function normalize(s){return (s||"").toLowerCase().replace(/\s+/g,"").replace(/[.,()·\-]/g,"")}
+function submitCurrent(){const q=quizSession[quizIndex];let ok=false,answer="";if(q.t==="mcq"||q.t==="tf"){if(currentSelected===null){showToast("답 먼저 골라줘");return}answer=currentSelected;ok=currentSelected===q.a}else{answer=document.getElementById("textAnswer").value.trim();if(!answer){showToast("아는 만큼이라도 적어줘");return}const n=normalize(answer),hits=(q.keys||[]).filter(k=>n.includes(normalize(k))).length;ok=hits>=Math.max(1,Math.ceil((q.keys||[]).length*.6))}const sec=Math.round((Date.now()-qStart)/1000);state.attempts.push({id:q.id,s:q.s,tag:q.tag,ok,sec,day:new Date().toISOString().slice(0,10),at:Date.now()});document.getElementById("feedbackSlot").innerHTML=`<div class="feedback ${ok?"ok":"no"}"><b>${ok?"정답/핵심어 잡음":"다시 볼 것"}</b><p style="margin:7px 0 0">${q.e}</p>${!ok?`<div class="causeBtns"><button onclick="markCause('몰랐음')">몰랐음</button><button onclick="markCause('헷갈림')">헷갈림</button><button onclick="markCause('문제읽기')">문제 잘못 읽음</button><button onclick="markCause('숫자·용어')">숫자/용어</button><button onclick="markCause('찍음')">찍음</button></div>`:""}<div class="row" style="margin-top:12px"><button class="primary" onclick="nextQuestion()">다음</button></div></div>`;saveState()}
+function markCause(c){state.causes[c]=(state.causes[c]||0)+1;saveState();showToast("실수 원인 기록됨")}function nextQuestion(){quizIndex++;renderQuestion()}
+function finishSession(){state.sessions=(state.sessions||0)+1;const today=new Date().toISOString().slice(0,10);if(state.lastSessionDate!==today){const y=new Date(Date.now()-86400000).toISOString().slice(0,10);state.streak=state.lastSessionDate===y?(state.streak||0)+1:1;state.lastSessionDate=today}saveState();if(lessonMode){finishLessonCheck();return}document.getElementById("quizBody").innerHTML=`<div class="empty"><h2>${quizSession.length}문제 끝.</h2><p>여기서 더 밀어붙이지 말고 2분 쉬어도 돼.</p><div class="lessonActions"><button class="primary" onclick="startBreak()">2분 쉬기</button><button class="ghost" onclick="startQuizFromSelect()">문제 더 풀기</button><button class="ghost" onclick="goPage('learn');renderLesson()">1~2분 설명으로 돌아가기</button><button class="bigSkip" onclick="goPage('learn');skipCurrentLesson()">지금 내용 충분히 앎 → 스킵</button></div></div>`}
+function startBreak(){focusRemaining=120;document.getElementById("focusTitle").textContent="2분 휴식";document.getElementById("focusText").textContent="화면 보지 말고 물 마시거나 몸만 움직여.";document.getElementById("focusOverlay").classList.add("show");focusRunning=false;updateFocus();toggleFocusTimer()}
+function toggleFocusTimer(){focusRunning=!focusRunning;document.getElementById("focusToggle").textContent=focusRunning?"일시정지":"시작";if(focusRunning){focusInt=setInterval(()=>{focusRemaining--;updateFocus();if(focusRemaining<=0){clearInterval(focusInt);focusRunning=false;showToast("시간 끝!");document.getElementById("focusToggle").textContent="완료"}},1000)}else clearInterval(focusInt)}
+function updateFocus(){const m=Math.floor(focusRemaining/60),s=focusRemaining%60;document.getElementById("focusTimer").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`}
+function closeFocus(){clearInterval(focusInt);focusRunning=false;document.getElementById("focusOverlay").classList.remove("show");focusRemaining=420;document.getElementById("focusTitle").textContent="7분 집중";document.getElementById("focusText").textContent="브라우저 다른 탭 닫고, 지금 문제 5개만.";updateFocus();document.getElementById("focusToggle").textContent="시작"}
+
+
+function subjectLessons(k){
+  const custom=(state.lessons&&state.lessons[k])||[];
+  return custom.length?custom:(BUILTIN_LESSONS[k]||[]);
+}
+function renderLesson(){
+  const sel=document.getElementById("learnSubject");
+  const k=(sel&&sel.value)||"brain";
+  state.lessonIndex=state.lessonIndex||{};
+  const pool=subjectLessons(k);
+  const idx=Math.min(state.lessonIndex[k]||0,Math.max(0,pool.length-1));
+  const item=pool[idx];
+  if(!item){
+    document.getElementById("lessonTitle").textContent="강의자료를 먼저 넣어줘";
+    document.getElementById("lessonText").innerHTML="자료 넣기에서 이 과목 강의자료나 녹취를 추가하면 여기에서 1~2분 핵심 설명을 만들어.";
+    document.getElementById("lessonSource").innerHTML="";
+    return;
+  }
+  document.getElementById("lessonTitle").textContent=item.title;
+  document.getElementById("lessonText").innerHTML="<ul>"+(item.bullets||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")+"</ul>";
+  document.getElementById("lessonSource").innerHTML=`<span class="sourceTag">근거: ${escapeHtml(item.source||"업로드 자료")}</span><span class="sourceTag">${idx+1}/${pool.length}</span>`;
+  const skipped=!!(state.lessonSkipped&&state.lessonSkipped[k+":"+idx]);
+  document.getElementById("lessonStatus").innerHTML=skipped?"이 핵심은 <b>스킵 표시됨</b>. 필요하면 다시 읽거나 문제를 풀어도 돼.":"처음이면 핵심을 1~2분 읽고 <b>확인문제 3개</b>를 눌러.";
+}
+function escapeHtml(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function nextLesson(){
+  const k=document.getElementById("learnSubject").value,pool=subjectLessons(k);
+  state.lessonIndex=state.lessonIndex||{};
+  state.lessonIndex[k]=pool.length?((state.lessonIndex[k]||0)+1)%pool.length:0;
+  saveState(false);renderLesson();
+}
+function skipCurrentLesson(){
+  const k=document.getElementById("learnSubject").value,idx=(state.lessonIndex&&state.lessonIndex[k])||0;
+  state.lessonSkipped=state.lessonSkipped||{};state.lessonSkipped[k+":"+idx]=true;
+  saveState();showToast("스킵 표시했어. 다음 핵심으로 넘어감");nextLesson();
+}
+function startLessonCheck(){
+  const k=document.getElementById("learnSubject").value;
+  lessonMode=true;lessonSubject=k;lessonAttemptStart=state.attempts.length;
+  document.getElementById("quizSubjectSelect").value=k;
+  goPage("quiz");startQuiz(k,3);
+}
+function finishLessonCheck(){
+  const recent=state.attempts.slice(lessonAttemptStart);
+  const correct=recent.filter(x=>x.ok).length,total=recent.length;
+  const rate=total?Math.round(correct/total*100):0;
+  state.learningStats=state.learningStats||{};
+  state.learningStats[lessonSubject]=state.learningStats[lessonSubject]||[];
+  state.learningStats[lessonSubject].push({at:Date.now(),correct,total,rate});
+  saveState();
+  const enough=total>=3&&correct>=2;
+  document.getElementById("quizBody").innerHTML=`
+    <div class="empty">
+      <h2>${correct}/${total} 맞음</h2>
+      <p>${enough?"어느 정도 잡혔어. 이 내용은 스킵하고 다음 핵심으로 넘어가도 돼.":"아직 애매해. 설명 한 번 더 보고 다시 3문제 하는 쪽이 좋아."}</p>
+      <div class="lessonActions">
+        <button class="primary" onclick="lessonMode=false;goPage('learn');renderLesson()">설명 다시 보기</button>
+        <button class="bigSkip" onclick="lessonMode=false;goPage('learn');skipCurrentLesson()">이 내용 충분히 앎 → 스킵</button>
+        <button class="ghost" onclick="startQuiz('${lessonSubject}',3)">확인문제 3개 더</button>
+        <button class="ghost" onclick="lessonMode=false;startQuiz('${lessonSubject}',5)">문제 5개로 넘어가기</button>
+      </div>
+    </div>`;
+}
+function generateLessonFromText(text,subject,srcName){
+  const raw=String(text||"").replace(/\r/g," ").replace(/\n+/g," ");
+  const sentences=raw.split(/(?<=[.!?。])\s+|(?<=다\.)\s+/).map(x=>x.trim()).filter(x=>x.length>=25&&x.length<=240);
+  const key=/중요|핵심|의의|정의|기능|종류|구분|단계|원칙|예외|기준|의무|권리|효력|시험|반드시|~란|이란/;
+  const ranked=[...sentences].sort((a,b)=>(key.test(b)?1:0)-(key.test(a)?1:0));
+  const picked=[];const seen=new Set();
+  for(const s of ranked){const k=s.replace(/\s+/g,"").slice(0,45);if(!seen.has(k)){seen.add(k);picked.push(s)}if(picked.length>=5)break}
+  if(!picked.length)return null;
+  return {title:`${srcName} 핵심 1~2분`,source:srcName,bullets:picked};
+}
+
+
+function blankPool(k){return allQuestions().filter(q=>q.s===k&&["essay","short"].includes(q.t))}
+function newBlankPrompt(){const k=document.getElementById("blankSubject").value,pool=blankPool(k);document.getElementById("blankAnswer").value="";document.getElementById("blankFeedback").innerHTML="";if(!pool.length){document.getElementById("blankPrompt").textContent="이 과목은 아직 백지문제 자료가 부족해.";document.getElementById("blankPrompt").dataset.qid="";return}const q=pool[Math.floor(Math.random()*pool.length)];document.getElementById("blankPrompt").textContent=q.p;document.getElementById("blankPrompt").dataset.qid=q.id}
+function revealBlank(){const id=document.getElementById("blankPrompt").dataset.qid,q=allQuestions().find(x=>x.id===id);if(!q)return;const ans=document.getElementById("blankAnswer").value,keys=q.keys||[],hits=keys.filter(k=>normalize(ans).includes(normalize(k)));document.getElementById("blankFeedback").innerHTML=`<div class="feedback"><b>${keys.length?`잡힌 핵심어 ${hits.length}/${keys.length}`:"공식문제 — 답안 직접 비교"}</b><p style="margin:7px 0">${q.e}</p><div>${keys.map(k=>`<span class="sourceTag">${k}</span>`).join("")}</div><div class="row" style="margin-top:12px"><button class="ghost" onclick="selfGradeBlank(true)">이 정도면 씀</button><button class="ghost" onclick="selfGradeBlank(false)">다시 써야 함</button></div></div>`}
+function selfGradeBlank(ok){const id=document.getElementById("blankPrompt").dataset.qid,q=allQuestions().find(x=>x.id===id);if(!q)return;state.attempts.push({id:q.id,s:q.s,tag:q.tag,ok,sec:0,day:new Date().toISOString().slice(0,10),at:Date.now(),blank:true});saveState();showToast("백지복습 기록됨");newBlankPrompt()}
+
+function renderPredictions(){const el=document.getElementById("predictGrid");el.innerHTML="";PREDICTIONS.forEach(p=>el.innerHTML+=`<div class="card predictCard"><div class="row" style="justify-content:space-between"><h3>${SUBJECTS[p.s].name}</h3><span class="badge high">${p.level}</span></div><div class="level">${p.title}</div><p class="muted" style="margin-top:9px">${p.text}</p><span class="sourceTag">${p.src}</span></div>`)}
+function renderAnalysis(){const a=state.attempts,acc=a.length?Math.round(a.filter(x=>x.ok).length/a.length*100):null;document.getElementById("accStat").textContent=acc===null?"-":acc+"%";document.getElementById("streakStat").textContent=state.streak||0;const tagStats={};a.forEach(x=>{tagStats[x.tag]=tagStats[x.tag]||[0,0];tagStats[x.tag][0]++;if(x.ok)tagStats[x.tag][1]++});let weak="-",wr=2;Object.entries(tagStats).forEach(([k,[n,c]])=>{if(n>=2&&c/n<wr){wr=c/n;weak=k}});document.getElementById("weakStat").textContent=weak;const table=document.getElementById("analysisTable");table.innerHTML="<tr><th>과목</th><th>풀이</th><th>정답률</th><th>평균시간</th></tr>";Object.entries(SUBJECTS).forEach(([k,s])=>{const x=a.filter(v=>v.s===k),rate=x.length?Math.round(x.filter(v=>v.ok).length/x.length*100):"-",secs=x.filter(v=>v.sec>0),avg=secs.length?Math.round(secs.reduce((p,c)=>p+c.sec,0)/secs.length)+"초":"-";table.innerHTML+=`<tr><td>${s.name}</td><td>${x.length}</td><td>${rate}${rate==="-"?"":"%"}</td><td>${avg}</td></tr>`});const causes=Object.entries(state.causes||{}).sort((a,b)=>b[1]-a[1]);document.getElementById("mistakePatterns").innerHTML=causes.length?causes.map(([k,v])=>`<div class="task"><div><b>${k}</b><small>${v}회</small></div><div class="progress" style="width:40%"><i style="width:${Math.min(100,v/Math.max(...causes.map(x=>x[1]))*100)}%"></i></div></div>`).join(""):'<div class="empty">오답을 풀고 원인을 누르면 여기에 쌓여.</div>'}
+function renderSources(){const all=PRELOADED_SOURCES.concat(state.sources||[]),list=document.getElementById("sourceList");list.innerHTML=all.slice().reverse().map(x=>`<div class="fileItem"><div><b>${x.name}</b><div class="small muted">${SUBJECTS[x.subject]?.name||x.subject} · ${x.type}</div></div><span class="badge">${x.extracted?"텍스트 추출":"등록"}</span></div>`).join("");document.getElementById("sourceReadiness").innerHTML=Object.entries(SUBJECTS).map(([k,s])=>`<div style="margin-bottom:10px"><div class="row" style="justify-content:space-between"><b>${s.name}</b><span class="small muted">${s.readiness}%</span></div><div class="progress"><i style="width:${s.readiness}%;background:${s.color}"></i></div></div>`).join("")}
+
+function generateQuestionsFromText(text,subject,srcName){const lines=text.replace(/\r/g,"").split(/\n+/).map(x=>x.trim()).filter(x=>x.length>=12&&x.length<=220),out=[];let count=0;const important=/중요|시험|반드시|의의|정의|기능|종류|구분|단계|원칙|예외|기준|의무|권리|기간|횟수|효력|목적/;for(const line of lines){if(count>=20)break;const nums=[...line.matchAll(/(\d+(?:\.\d+)?)\s*(개|회|일|개월|년|%|쌍)/g)];if(nums.length){const n=nums[0][1],unit=nums[0][2],p=line.replace(nums[0][0],`__${unit}`);out.push({id:"g"+Date.now()+count,s:subject,t:"fill",p,keys:[n],e:line,tag:"숫자·기간",src:srcName,c:"자료기반"});count++;continue}if(important.test(line)){out.push({id:"g"+Date.now()+count,s:subject,t:"short",p:`다음 내용을 핵심어 중심으로 설명해봐: ${line.slice(0,45)}${line.length>45?"…":""}`,keys:[],e:line,tag:"업로드자료",src:srcName,c:"자료기반"});count++}}return out}
+
+async function handleFiles(files){const subject=document.getElementById("sourceSubject").value,type=document.getElementById("sourceType").value;for(const file of files){showToast(`${file.name} 읽는 중…`);let text="",extracted=false;try{const ext=file.name.split(".").pop().toLowerCase();if(["txt","md","csv"].includes(ext)){text=await file.text();extracted=true}else if(ext==="pdf"){text=await extractPdf(file);extracted=true}else if(ext==="pptx"){text=await extractZipXml(file,/ppt\/slides\/slide\d+\.xml/);extracted=true}else if(ext==="hwpx"){text=await extractZipXml(file,/Contents\/section\d+\.xml/);extracted=true}else if(["png","jpg","jpeg","webp"].includes(ext)){text=await extractImageOcr(file);extracted=true}}catch(e){console.error(e);showToast(`${file.name} 텍스트 추출 실패 — 파일명만 저장`)}const src={subject,type,name:file.name,extracted,text:text.slice(0,120000),at:Date.now()};state.sources.push(src);if(text){state.generated.push(...generateQuestionsFromText(text,subject,file.name));const lesson=generateLessonFromText(text,subject,file.name);if(lesson){state.lessons=state.lessons||{};state.lessons[subject]=state.lessons[subject]||[];state.lessons[subject].push(lesson)}}saveState(false)}saveState();showToast("자료 저장 완료 — 처음 배우기에서 핵심 설명 확인 가능")}
+async function extractPdf(file){if(!window.pdfjsLib)throw new Error("pdfjs unavailable");pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";const data=new Uint8Array(await file.arrayBuffer()),pdf=await pdfjsLib.getDocument({data}).promise;let out="";for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i),c=await p.getTextContent();out+=c.items.map(x=>x.str).join(" ")+"\n"}return out}
+async function extractZipXml(file,pattern){const zip=await JSZip.loadAsync(file);let out="";const names=Object.keys(zip.files).filter(n=>pattern.test(n)).sort();for(const n of names){const xml=await zip.files[n].async("string"),doc=new DOMParser().parseFromString(xml,"text/xml");out+=[...doc.getElementsByTagName("*")].filter(x=>x.textContent&&x.children.length===0).map(x=>x.textContent).join(" ")+"\n"}return out}
+async function extractImageOcr(file){if(!window.Tesseract)throw new Error("ocr unavailable");const {data:{text}}=await Tesseract.recognize(file,"kor+eng");return text}
+document.getElementById("fileInput").addEventListener("change",e=>handleFiles([...e.target.files]));const dz=document.getElementById("dropZone");["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("drag")}));["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("drag")}));dz.addEventListener("drop",e=>handleFiles([...e.dataTransfer.files]));
+function saveManualSource(){const text=document.getElementById("manualText").value.trim();if(!text){showToast("텍스트를 붙여넣어줘");return}const subject=document.getElementById("sourceSubject").value,type=document.getElementById("sourceType").value,name=`${type} ${new Date().toLocaleDateString("ko-KR")}`;state.sources.push({subject,type,name,extracted:true,text,at:Date.now()});state.generated.push(...generateQuestionsFromText(text,subject,name));const lesson=generateLessonFromText(text,subject,name);if(lesson){state.lessons=state.lessons||{};state.lessons[subject]=state.lessons[subject]||[];state.lessons[subject].push(lesson)};document.getElementById("manualText").value="";saveState();showToast("저장 + 문제 후보 생성 완료")}
+function generateQuestionsFromAll(){let added=0;(state.sources||[]).forEach(src=>{if(src.text){const q=generateQuestionsFromText(src.text,src.subject,src.name);state.generated.push(...q);added+=q.length}});saveState();showToast(`${added}개 문제 후보 추가`)}
+
+function startDiagnostic(){state.diagnostic={started:Date.now(),recommendation:"실제 공부 기록으로 자동 보정"};saveState();goPage("learn");renderLesson();showToast("진단용 별도 시험 없이, 배우면서 자동 진단해")}
+
+function renderAll(){ensureDefaultEvents();renderDeadlines();renderToday();renderSubjects();renderPredictions();renderAnalysis();renderSources();populateSelects();populateEventSelects();renderTopDday();renderCalendar();applyScreenMode();if(document.getElementById("page-learn")?.classList.contains("active"))renderLesson()}
+function openSettings(){const cfg=JSON.parse(localStorage.getItem("examSyncConfig")||"{}");document.getElementById("sbUrl").value=cfg.url||"";document.getElementById("sbKey").value=cfg.key||"";document.getElementById("roomCode").value=cfg.room||"";document.getElementById("screenMode").value=state.settings?.screenMode||"auto";openModal("settingsModal")}
+function saveScreenMode(){state.settings=state.settings||{};state.settings.screenMode=document.getElementById("screenMode").value;saveState(false);applyScreenMode()}
+function applyScreenMode(){const m=state.settings?.screenMode||"auto";document.body.style.maxWidth=m==="phone"?"430px":"";document.body.style.margin=m==="phone"?"0 auto":""}
+
+
+const EXAM_CLOUD_KEY="exam-study-cloud-config-v3";
+const EXAM_VER_KEY="exam-study-cloud-version-v3";
+function normalizeUrl(x){return String(x||"").trim().replace(/\/+$/,"")}
+function inheritedFatCloud(){
+  try{
+    const f=JSON.parse(localStorage.getItem("fat1-cloud-config-v1")||"null");
+    if(f&&f.url&&f.key&&f.code)return {url:normalizeUrl(f.url),key:f.key,code:"EXAM_STUDY_V3::"+f.code,inherited:true};
+  }catch(e){}
+  return null;
+}
+function syncConfig(){
+  try{
+    const own=JSON.parse(localStorage.getItem(EXAM_CLOUD_KEY)||"null");
+    if(own&&own.url&&own.key&&own.code)return own;
+  }catch(e){}
+  return inheritedFatCloud()||{url:"",key:"",code:"",inherited:false};
+}
+function hasCloud(){const c=syncConfig();return !!(c.url&&c.key&&c.code)}
+function openSettings(){
+  const cfg=syncConfig(),fat=inheritedFatCloud();
+  document.getElementById("sbUrl").value=cfg.url||"";
+  document.getElementById("sbKey").value=cfg.key||"";
+  const room=document.getElementById("roomCode");
+  if(cfg.inherited){room.value="FAT 자동동기화 설정 사용 중";room.disabled=true}
+  else{room.value=cfg.code||"";room.disabled=false}
+  document.getElementById("screenMode").value=state.settings?.screenMode||"auto";
+  openModal("settingsModal");
+}
+async function connectSync(){
+  const inherited=inheritedFatCloud();
+  const roomEl=document.getElementById("roomCode");
+  if(inherited&&roomEl.disabled){closeModal("settingsModal");await initSync(true);return}
+  const url=normalizeUrl(document.getElementById("sbUrl").value),key=document.getElementById("sbKey").value.trim(),room=roomEl.value.trim();
+  if(!url||!key||!room){showToast("URL, key, 동기화 코드 3개 다 필요해");return}
+  localStorage.setItem(EXAM_CLOUD_KEY,JSON.stringify({url,key,code:"EXAM_STUDY_V3::"+room,inherited:false}));
+  cloudVersion=0;localStorage.setItem(EXAM_VER_KEY,"0");cloudReady=false;closeModal("settingsModal");await initSync(true);
+}
+async function rpc(name,args){
+  const c=syncConfig();if(!c.url||!c.key)throw new Error("클라우드 설정 없음");
+  const res=await fetch(c.url+"/rest/v1/rpc/"+name,{method:"POST",headers:{"Content-Type":"application/json","apikey":c.key,"Authorization":"Bearer "+c.key},body:JSON.stringify(args)});
+  const text=await res.text();if(!res.ok)throw new Error(text||("HTTP "+res.status));return text?JSON.parse(text):[];
+}
+function uniqBy(arr,keyFn){
+  const m=new Map();(arr||[]).forEach(x=>{const k=keyFn(x);const prev=m.get(k);if(!prev||((x.updatedAt||x.at||0)>(prev.updatedAt||prev.at||0)))m.set(k,x)});return [...m.values()];
+}
+function mergedState(a,b){
+  a=a||{};b=b||{};const newer=(a.updatedAt||0)>=(b.updatedAt||0)?a:b;
+  const out={...initialState,...newer};
+  out.attempts=uniqBy([...(a.attempts||[]),...(b.attempts||[])],x=>`${x.id}|${x.at||0}|${x.blank?"b":""}`);
+  out.generated=uniqBy([...(a.generated||[]),...(b.generated||[])],x=>x.id||JSON.stringify(x));
+  out.sources=uniqBy([...(a.sources||[]),...(b.sources||[])],x=>`${x.name}|${x.at||0}`);
+  out.events=uniqBy([...(a.events||[]),...(b.events||[])],x=>x.id);
+  out.causes={...(a.causes||{})};Object.entries(b.causes||{}).forEach(([k,v])=>out.causes[k]=Math.max(out.causes[k]||0,v||0));
+  out.completedTasks={...(a.completedTasks||{}),...(b.completedTasks||{})};
+  out.lessonSkipped={...(a.lessonSkipped||{}),...(b.lessonSkipped||{})};
+  out.lessons={...(a.lessons||{})};Object.entries(b.lessons||{}).forEach(([k,v])=>out.lessons[k]=uniqBy([...(out.lessons[k]||[]),...(v||[])],x=>`${x.title}|${x.source}`));
+  out.learningStats={...(a.learningStats||{})};Object.entries(b.learningStats||{}).forEach(([k,v])=>out.learningStats[k]=uniqBy([...(out.learningStats[k]||[]),...(v||[])],x=>x.at||JSON.stringify(x)));
+  out.sessions=Math.max(a.sessions||0,b.sessions||0);out.streak=Math.max(a.streak||0,b.streak||0);
+  out.updatedAt=Math.max(a.updatedAt||0,b.updatedAt||0);ensureStateEvents(out);
+  return out;
+}
+function ensureStateEvents(s){s.events=s.events||[];const ids=new Set(s.events.map(e=>e.id));DEFAULT_EVENTS.forEach(e=>{if(!ids.has(e.id))s.events.push({...e})})}
+async function initSync(first=false){
+  if(!hasCloud()){setSync(false);return}
+  cloudVersion=Number(localStorage.getItem(EXAM_VER_KEY)||0);
+  await pullCloud(first);startCloudLoop();
+}
+function setSync(on){document.getElementById("syncDot").classList.toggle("on",on);document.getElementById("syncLabel").textContent=on?"자동동기화 ON":"이 기기 저장"}
+function schedulePush(){if(!hasCloud())return;clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushCloud(false),700)}
+async function pullCloud(manual=false){
+  if(!hasCloud()||cloudBusy)return false;cloudBusy=true;setSync(false);document.getElementById("syncLabel").textContent="동기화 중";
+  try{
+    const c=syncConfig(),rows=await rpc("fat1_pull",{p_code:c.code});
+    if(!rows.length){cloudVersion=0;localStorage.setItem(EXAM_VER_KEY,"0");cloudReady=true;await pushCloud(true);setSync(true);if(manual)showToast(c.inherited?"FAT 설정으로 자동동기화 연결됨":"자동동기화 연결됨");return true}
+    const row=rows[0],server=row.payload||{};
+    if(server.app&&server.app!=="exam-study-v3")throw new Error("다른 앱 동기화 데이터와 충돌");
+    const remote=server.state||server;
+    state=mergedState(state,remote);localStorage.setItem("examStudyState",JSON.stringify(state));renderAll();
+    cloudVersion=Number(row.version||0);localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));cloudReady=true;setSync(true);
+    if(manual)showToast(c.inherited?"FAT 설정으로 자동동기화 연결됨":"클라우드 기록 불러옴");
+    return true;
+  }catch(e){console.error(e);setSync(false);if(manual)showToast("동기화 실패 — Supabase 설정 확인");return false}finally{cloudBusy=false}
+}
+async function pushCloud(force=false,retry=false){
+  if(!hasCloud())return false;if(cloudBusy&&!force)return false;if(!cloudReady&&!force){await pullCloud(false);return true}
+  try{
+    const c=syncConfig(),payload={app:"exam-study-v3",state};
+    const rows=await rpc("fat1_push",{p_code:c.code,p_payload:payload,p_base_version:cloudVersion||null}),r=rows&&rows[0];
+    if(r&&r.conflict){
+      const sr=await rpc("fat1_pull",{p_code:c.code});if(sr.length){const remote=sr[0].payload?.state||sr[0].payload||{};state=mergedState(state,remote);localStorage.setItem("examStudyState",JSON.stringify(state));renderAll();cloudVersion=Number(sr[0].version||0);localStorage.setItem(EXAM_VER_KEY,String(cloudVersion))}
+      if(!retry)return await pushCloud(true,true);throw new Error("동시수정 충돌");
+    }
+    if(r&&r.ok){cloudVersion=Number(r.version||cloudVersion||1);localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));cloudReady=true;setSync(true);return true}
+    throw new Error("저장 응답 오류");
+  }catch(e){console.error(e);setSync(false);return false}
+}
+function startCloudLoop(){clearInterval(cloudPollTimer);cloudPollTimer=setInterval(()=>{if(document.visibilityState==="visible")pullCloud(false)},15000)}
+async function testSync(){
+  const inherited=inheritedFatCloud();if(inherited){showToast("FAT 자동동기화 설정 발견됨 — 바로 사용 가능");return}
+  const url=normalizeUrl(document.getElementById("sbUrl").value),key=document.getElementById("sbKey").value.trim();if(!url||!key){showToast("URL과 key를 먼저 넣어줘");return}
+  try{const old=localStorage.getItem(EXAM_CLOUD_KEY),room=document.getElementById("roomCode").value.trim()||"TEST";localStorage.setItem(EXAM_CLOUD_KEY,JSON.stringify({url,key,code:"EXAM_STUDY_V3::"+room}));await rpc("fat1_pull",{p_code:"EXAM_STUDY_V3::"+room});if(old)localStorage.setItem(EXAM_CLOUD_KEY,old);else localStorage.removeItem(EXAM_CLOUD_KEY);showToast("Supabase 연결 가능")}catch(e){showToast("연결 테스트 실패")}
+}
+function disconnectSync(){localStorage.removeItem(EXAM_CLOUD_KEY);localStorage.removeItem(EXAM_VER_KEY);cloudVersion=0;cloudReady=false;setSync(false);closeModal("settingsModal");showToast("이 사이트의 별도 연결 설정만 지웠어. FAT 설정은 그대로야.")}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")pullCloud(false)});
+window.addEventListener("online",()=>pullCloud(false));
+window.addEventListener("focus",()=>pullCloud(false));
+
+window.addEventListener("load",()=>{ensureDefaultEvents();calendarSelected=dateKey(new Date());renderAll();resetEventForm();newBlankPrompt();renderLesson();initSync(true);updateFocus()});
+</script>
+</body>
+</html>

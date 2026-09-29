@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#f7f7fb"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-<title>시험공부 통합실</title>
+<title>시험공부 통합실 v3.1</title>
 <style>
 :root{
   --bg:#f6f7fb; --card:#ffffff; --text:#171922; --muted:#777c8c; --line:#e8eaf1;
@@ -361,7 +361,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
     <div class="field"><label>Supabase Project URL</label><input id="sbUrl" placeholder="https://xxxxx.supabase.co"/></div>
     <div class="field" style="margin-top:10px"><label>Supabase publishable / anon key</label><input id="sbKey" placeholder="sb_publishable_... 또는 eyJ..."/></div>
     <div class="field" style="margin-top:10px"><label>내 공부방 동기화 코드</label><input id="roomCode" placeholder="예: EXAM-2026-MID"/></div>
-    <div class="row" style="margin-top:14px"><button class="primary" onclick="connectSync()">연결하고 동기화 시작</button><button class="ghost" onclick="testSync()">연결 테스트</button><button class="dangerBtn" onclick="disconnectSync()">클라우드 연결 해제</button></div>
+    <div class="row" style="margin-top:14px"><button class="primary" onclick="connectSync()">연결하고 동기화 시작</button><button class="ghost" onclick="manualSyncNow()">지금 동기화</button><button class="ghost" onclick="testSync()">연결 테스트</button><button class="dangerBtn" onclick="disconnectSync()">클라우드 연결 해제</button></div>
     <hr/><div class="field"><label>화면 모드</label><select id="screenMode" onchange="saveScreenMode()"><option value="auto">자동</option><option value="pc">PC</option><option value="phone">iPhone</option></select></div>
   </div>
 </div>
@@ -554,10 +554,19 @@ const DEADLINES = [
 ];
 
 const initialState = {attempts:[],causes:{},sessions:0,lastSessionDate:null,streak:0,diagnostic:null,sources:[],generated:[],lessons:{},lessonIndex:{},lessonSkipped:{},learningStats:{},events:[],updatedAt:0,settings:{screenMode:"auto"},completedTasks:{}};
-let state=loadState(),syncClient=null,syncTimer=null,pushTimer=null,quizSession=[],quizIndex=0,currentSelected=null,qStart=0,focusRemaining=420,focusRunning=false,focusInt=null,lessonMode=false,lessonSubject=null,lessonAttemptStart=0,calendarCursor=new Date(),calendarSelected=null,cloudVersion=0,cloudReady=false,cloudBusy=false,cloudPollTimer=null;
+let state=loadState(),syncClient=null,syncTimer=null,pushTimer=null,quizSession=[],quizIndex=0,currentSelected=null,qStart=0,focusRemaining=420,focusRunning=false,focusInt=null,lessonMode=false,lessonSubject=null,lessonAttemptStart=0,calendarCursor=new Date(),calendarSelected=null,cloudVersion=0,cloudReady=false,cloudBusy=false,cloudPollTimer=null,syncPending=false;
 
 function loadState(){try{return {...initialState,...JSON.parse(localStorage.getItem("examStudyState")||"{}")}}catch(e){return {...initialState}}}
-function saveState(sync=true){state.updatedAt=Date.now();localStorage.setItem("examStudyState",JSON.stringify(state));renderAll();if(sync)schedulePush()}
+function saveState(sync=true){
+  state.updatedAt=Date.now();
+  localStorage.setItem("examStudyState",JSON.stringify(state));
+  renderAll();
+  if(sync){
+    syncPending=true;
+    localStorage.setItem("exam-study-sync-pending","1");
+    schedulePush();
+  }
+}
 function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
 function closeModal(id){document.getElementById(id).classList.remove("show")} function openModal(id){document.getElementById(id).classList.add("show")}
 function goPage(p){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById("page-"+p).classList.add("active");document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===p));window.scrollTo({top:0,behavior:"smooth"})}
@@ -908,35 +917,131 @@ async function initSync(first=false){
   await pullCloud(first);startCloudLoop();
 }
 function setSync(on){document.getElementById("syncDot").classList.toggle("on",on);document.getElementById("syncLabel").textContent=on?"자동동기화 ON":"이 기기 저장"}
-function schedulePush(){if(!hasCloud())return;clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushCloud(false),700)}
+function schedulePush(){
+  if(!hasCloud())return;
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(async()=>{
+    if(cloudBusy){ schedulePush(); return; }
+    const ok=await pushCloud(false);
+    if(!ok && hasCloud()) setTimeout(schedulePush,1200);
+  },700);
+}
 async function pullCloud(manual=false){
-  if(!hasCloud()||cloudBusy)return false;cloudBusy=true;setSync(false);document.getElementById("syncLabel").textContent="동기화 중";
+  if(!hasCloud()||cloudBusy)return false;
+  cloudBusy=true;
+  setSync(false);
+  document.getElementById("syncLabel").textContent="동기화 중";
   try{
     const c=syncConfig(),rows=await rpc("fat1_pull",{p_code:c.code});
-    if(!rows.length){cloudVersion=0;localStorage.setItem(EXAM_VER_KEY,"0");cloudReady=true;await pushCloud(true);setSync(true);if(manual)showToast(c.inherited?"FAT 설정으로 자동동기화 연결됨":"자동동기화 연결됨");return true}
+    if(!rows.length){
+      cloudVersion=0;
+      localStorage.setItem(EXAM_VER_KEY,"0");
+      cloudReady=true;
+      cloudBusy=false;
+      const ok=await pushCloud(true);
+      if(ok){
+        setSync(true);
+        if(manual)showToast(c.inherited?"FAT 설정으로 자동동기화 연결됨":"자동동기화 연결됨");
+      }
+      return ok;
+    }
     const row=rows[0],server=row.payload||{};
     if(server.app&&server.app!=="exam-study-v3")throw new Error("다른 앱 동기화 데이터와 충돌");
     const remote=server.state||server;
-    state=mergedState(state,remote);localStorage.setItem("examStudyState",JSON.stringify(state));renderAll();
-    cloudVersion=Number(row.version||0);localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));cloudReady=true;setSync(true);
-    if(manual)showToast(c.inherited?"FAT 설정으로 자동동기화 연결됨":"클라우드 기록 불러옴");
+    const hadPending=syncPending||localStorage.getItem("exam-study-sync-pending")==="1";
+    state=mergedState(state,remote);
+    localStorage.setItem("examStudyState",JSON.stringify(state));
+    cloudVersion=Number(row.version||0);
+    localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));
+    cloudReady=true;
+    setSync(true);
+    renderAll();
+    cloudBusy=false;
+    if(hadPending){ syncPending=true; schedulePush(); }
+    if(manual)showToast("클라우드 기록 확인 완료");
     return true;
-  }catch(e){console.error(e);setSync(false);if(manual)showToast("동기화 실패 — Supabase 설정 확인");return false}finally{cloudBusy=false}
+  }catch(e){
+    console.error(e);
+    setSync(false);
+    if(manual)showToast("동기화 실패 — Supabase 설정 확인");
+    return false;
+  }finally{
+    cloudBusy=false;
+  }
 }
 async function pushCloud(force=false,retry=false){
-  if(!hasCloud())return false;if(cloudBusy&&!force)return false;if(!cloudReady&&!force){await pullCloud(false);return true}
+  if(!hasCloud())return false;
+  if(cloudBusy && !force){
+    syncPending=true;
+    localStorage.setItem("exam-study-sync-pending","1");
+    return false;
+  }
+  if(!cloudReady && !force){
+    await pullCloud(false);
+    if(!cloudReady)return false;
+  }
+  cloudBusy=true;
   try{
     const c=syncConfig(),payload={app:"exam-study-v3",state};
-    const rows=await rpc("fat1_push",{p_code:c.code,p_payload:payload,p_base_version:cloudVersion||null}),r=rows&&rows[0];
+    const rows=await rpc("fat1_push",{p_code:c.code,p_payload:payload,p_base_version:cloudVersion||null});
+    const r=rows&&rows[0];
     if(r&&r.conflict){
-      const sr=await rpc("fat1_pull",{p_code:c.code});if(sr.length){const remote=sr[0].payload?.state||sr[0].payload||{};state=mergedState(state,remote);localStorage.setItem("examStudyState",JSON.stringify(state));renderAll();cloudVersion=Number(sr[0].version||0);localStorage.setItem(EXAM_VER_KEY,String(cloudVersion))}
-      if(!retry)return await pushCloud(true,true);throw new Error("동시수정 충돌");
+      const sr=await rpc("fat1_pull",{p_code:c.code});
+      if(sr.length){
+        const remote=sr[0].payload?.state||sr[0].payload||{};
+        state=mergedState(state,remote);
+        localStorage.setItem("examStudyState",JSON.stringify(state));
+        cloudVersion=Number(sr[0].version||0);
+        localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));
+        renderAll();
+      }
+      cloudBusy=false;
+      if(!retry)return await pushCloud(true,true);
+      throw new Error("동시수정 충돌");
     }
-    if(r&&r.ok){cloudVersion=Number(r.version||cloudVersion||1);localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));cloudReady=true;setSync(true);return true}
+    if(r&&r.ok){
+      cloudVersion=Number(r.version||cloudVersion||1);
+      localStorage.setItem(EXAM_VER_KEY,String(cloudVersion));
+      localStorage.setItem("exam-study-last-push",String(Date.now()));
+      localStorage.removeItem("exam-study-sync-pending");
+      syncPending=false;
+      cloudReady=true;
+      setSync(true);
+      return true;
+    }
     throw new Error("저장 응답 오류");
-  }catch(e){console.error(e);setSync(false);return false}
+  }catch(e){
+    console.error(e);
+    syncPending=true;
+    localStorage.setItem("exam-study-sync-pending","1");
+    setSync(false);
+    return false;
+  }finally{
+    cloudBusy=false;
+  }
 }
-function startCloudLoop(){clearInterval(cloudPollTimer);cloudPollTimer=setInterval(()=>{if(document.visibilityState==="visible")pullCloud(false)},15000)}
+function startCloudLoop(){
+  clearInterval(cloudPollTimer);
+  cloudPollTimer=setInterval(()=>{
+    if(document.visibilityState==="visible"){
+      if(syncPending||localStorage.getItem("exam-study-sync-pending")==="1") pushCloud(false);
+      else pullCloud(false);
+    }
+  },5000);
+}
+async function manualSyncNow(){
+  if(!hasCloud()){showToast("자동동기화 설정이 없어");return}
+  syncPending=true;
+  localStorage.setItem("exam-study-sync-pending","1");
+  const pushed=await pushCloud(false);
+  if(pushed){
+    await pullCloud(false);
+    showToast("지금 동기화 완료");
+  }else{
+    showToast("동기화 재시도 중");
+    schedulePush();
+  }
+}
 async function testSync(){
   const inherited=inheritedFatCloud();if(inherited){showToast("FAT 자동동기화 설정 발견됨 — 바로 사용 가능");return}
   const url=normalizeUrl(document.getElementById("sbUrl").value),key=document.getElementById("sbKey").value.trim();if(!url||!key){showToast("URL과 key를 먼저 넣어줘");return}
@@ -947,7 +1052,17 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("online",()=>pullCloud(false));
 window.addEventListener("focus",()=>pullCloud(false));
 
-window.addEventListener("load",()=>{ensureDefaultEvents();calendarSelected=dateKey(new Date());renderAll();resetEventForm();newBlankPrompt();renderLesson();initSync(true);updateFocus()});
+window.addEventListener("load",()=>{
+  ensureDefaultEvents();
+  calendarSelected=dateKey(new Date());
+  syncPending=localStorage.getItem("exam-study-sync-pending")==="1";
+  renderAll();
+  resetEventForm();
+  newBlankPrompt();
+  renderLesson();
+  initSync(true).then(()=>{ if(syncPending) schedulePush(); });
+  updateFocus();
+});
 </script>
 </body>
 </html>
